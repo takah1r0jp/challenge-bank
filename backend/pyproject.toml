@@ -1,0 +1,11 @@
+[project]
+name = "failure-bank-backend"
+version = "0.1.0"
+description = "失敗を貯金するアプリのバックエンド"
+requires-python = ">=3.10"
+
+dependencies = [
+    "fastapi>=0.121.1",
+    "sqlalchemy>=2.0.44",
+    "uvicorn>=0.38.0",
+]
