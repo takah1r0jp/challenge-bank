@@ -7,15 +7,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 
 
-def generate_uuid() -> str:
-    return str(uuid.uuid4())
+def generate_uuid() -> uuid.UUID:
+    return uuid.uuid4()
 
 
 class User(Base):
     __tablename__ = "users"
 
     # uuidをprimary keyとして使用
-    id: Mapped[str] = mapped_column(Uuid, primary_key=True, default=generate_uuid)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=generate_uuid)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     notification_time: Mapped[str] = mapped_column(

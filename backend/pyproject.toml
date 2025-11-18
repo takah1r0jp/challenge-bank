@@ -6,6 +6,64 @@ requires-python = ">=3.10"
 
 dependencies = [
     "fastapi>=0.121.1",
+    "psycopg2>=2.9.11",
+    "ruff>=0.14.4",
     "sqlalchemy>=2.0.44",
     "uvicorn>=0.38.0",
+    "pytest>=8.0.0",
+    "httpx>=0.27.0",
+    "pytest-asyncio>=0.23.0",
+    "email-validator>=2.3.0",
+    "pyjwt>=2.10.1",
+    "passlib>=1.7.4",
+    "argon2-cffi>=25.1.0",
+]
+
+# backend/pyproject.toml を作成（または既存ファイルに追記）
+[tool.ruff]
+# 1行の最大文字数
+line-length = 100
+
+# Python 3.10以上
+target-version = "py310"
+
+# 除外するディレクトリ
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".git",
+]
+
+[tool.ruff.lint]
+# 有効にするルール
+select = [
+    "E",   # pycodestyle エラー
+    "W",   # pycodestyle 警告
+    "F",   # Pyflakes
+    "I",   # isort (import順序)
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+]
+
+# 無視するルール（必要に応じて調整）
+ignore = [
+    "E501",  # 行が長すぎる（line-lengthで制御）
+]
+
+[tool.ruff.format]
+# クォートスタイル
+quote-style = "double"
+
+# インデント
+indent-style = "space"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # 外部ライブラリ由来の警告（自コードには影響なし）
+    # - passlib内部でcryptモジュール使用（Python3.13で削除予定）
+    # - argon2-cffiのバージョン確認方法が古い
+    # TODO: Python 3.13移行前にpasslib/argon2-cffi更新を確認
+    "ignore:.*crypt.*is deprecated:DeprecationWarning",
+    "ignore:.*argon2.__version__.*:DeprecationWarning",
 ]
