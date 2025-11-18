@@ -1,7 +1,6 @@
-from database import Base, engine
-
 # モデルをインポートしてBaseに登録
 import models  # noqa: F401
+from database import Base, engine
 
 # テーブル作成
 Base.metadata.create_all(bind=engine)
