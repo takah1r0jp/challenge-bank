@@ -1,14 +1,20 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from auth import create_access_token, get_password_hash, verify_password
 
 # 必要なモジュール
 from database import get_db
 from models import User
-from schemas import UserCreate, UserResponse, SuccessResponse, ErrorResponse, ErrorDetail, UserWithToken
-from auth import get_password_hash, create_access_token
+from schemas import (
+    SuccessResponse,
+    UserCreate,
+    UserResponse,
+    UserWithToken,
+)
 
 app = FastAPI(title="Failure Bank")
 
@@ -27,6 +33,7 @@ app.add_middleware(
 def root():
     return {"message": "Failure Bank API is running."}
 
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """HTTPExceptionのカスタムハンドラー"""
@@ -37,7 +44,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         404: "NOT_FOUND",
         422: "VALIDATION_ERROR",
     }
-    
+
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -46,40 +53,36 @@ async def http_exception_handler(request: Request, exc: HTTPException):
                 "code": error_code_map.get(exc.status_code, "ERROR"),
                 "message": exc.detail,
                 "details": None,
-            }
-        }
+            },
+        },
     )
 
+
 # ユーザー登録
-@app.post(
-    "/auth/register", 
-    status_code=status.HTTP_201_CREATED, 
-    response_model=SuccessResponse
-)
+@app.post("/auth/register", status_code=status.HTTP_201_CREATED, response_model=SuccessResponse)
 def register_user(
-    user_data: UserCreate, # リクエストボディから受け取るデータ
-    db: Session = Depends(get_db) # DBセッションを依存性注入で取得
+    user_data: UserCreate,  # リクエストボディから受け取るデータ
+    db: Session = Depends(get_db),  # DBセッションを依存性注入で取得
 ):
     """新規ユーザーを登録するエンドポイント"""
-    
+
     # 1. メールアドレスの重複チェック
     exisiting_user = db.query(User).filter(User.email == user_data.email).first()
-    
+
     if exisiting_user:
         # 400 bad requestを返す
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A user with this email already exists."
+            status_code=status.HTTP_400_BAD_REQUEST, detail="A user with this email already exists."
         )
-    
+
     # 2. パスワードのハッシュ化
     hashed_password = get_password_hash(user_data.password)
-    
+
     # 3. 新機ユーザーをDBに追加
     new_user = User(
         email=user_data.email,
         hashed_password=hashed_password,
-        notification_time=user_data.notification_time
+        notification_time=user_data.notification_time,
     )
 
     # セッションに追加(まだDBに保存されていない)
@@ -87,26 +90,52 @@ def register_user(
 
     try:
         db.commit()
-        
+
         db.refresh(new_user)  # 新規ユーザーの情報を取得(id, created_atなど)
     except IntegrityError:
         # UNIQUE制約違反などのDB制約エラーが出た場合
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Database integrity error occurred during user registration."
+            detail="Database integrity error occurred during user registration.",
         )
-    
+
     # 4. レスポンスを返す
-    user_response = UserResponse.model_validate(new_user)        
+    user_response = UserResponse.model_validate(new_user)
 
     # トークン生成
     access_token = create_access_token(data={"sub": new_user.email})
-    
+
     user_response = UserWithToken(**user_response.model_dump(), access_token=access_token)
 
     return {
         "success": True,
         "data": user_response.model_dump(),
-        "message": "User registered successfully."
+        "message": "User registered successfully.",
     }
+
+
+# ログイン機能
+@app.post("/auth/login", response_model=SuccessResponse, status_code=status.HTTP_200_OK)
+def login_user(request_data: UserCreate, db: Session = Depends(get_db)):
+    # 1. ユーザーの存在確認
+    user = db.query(User).filter(User.email == request_data.email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password."
+        )
+
+    # 2. パスワードの検証
+    if not verify_password(request_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password."
+        )
+
+    # 3. トークン生成
+    access_token = create_access_token(data={"sub": user.email})
+
+    user_response = UserWithToken(
+        **UserResponse.model_validate(user).model_dump(), access_token=access_token
+    )
+
+    return {"success": True, "data": user_response.model_dump(), "message": "Login successful."}

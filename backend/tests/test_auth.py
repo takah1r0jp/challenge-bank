@@ -29,8 +29,7 @@ class TestUserRegistration:
         assert "access_token" in data["data"]
         assert data["data"]["token_type"] == "bearer"
         assert len(data["data"]["access_token"]) > 0
-        
-        
+
     def test_register_duplicate_email(self, client: TestClient, db: Session):
         """異常系: 同じメールアドレスで登録できない"""
         # 1回目の登録
@@ -125,7 +124,7 @@ class TestUserLogin:
         assert response.status_code == 401
         data = response.json()
         assert data["success"] is False
-        assert "incorrect" in data["error"]["message"].lower()
+        assert data["error"]["message"] == "Invalid email or password."
 
     def test_login_nonexistent_user(self, client: TestClient, db: Session):
         """異常系: 存在しないユーザーでログインできない"""
@@ -152,7 +151,7 @@ class TestGetCurrentUser:
                 "password": "password123",
             },
         )
-        
+
         token = register_response.json()["data"]["access_token"]
 
         # トークンを使って自分の情報を取得
