@@ -24,6 +24,11 @@ class TestUserRegistration:
         assert "created_at" in data["data"]
         assert "password" not in data["data"]  # パスワードは返さない
         assert "hashed_password" not in data["data"]  # ハッシュ化されたパスワードも返さない
+
+        # トークン検証
+        assert "access_token" in data["data"]
+        assert data["data"]["token_type"] == "bearer"
+        assert len(data["data"]["access_token"]) > 0
         
         
     def test_register_duplicate_email(self, client: TestClient, db: Session):
@@ -140,22 +145,15 @@ class TestGetCurrentUser:
     def test_get_me_success(self, client: TestClient, db: Session):
         """正常系: 認証済みユーザーの情報を取得できる"""
         # ユーザーを登録
-        client.post(
+        register_response = client.post(
             "/auth/register",
             json={
                 "email": "test@example.com",
                 "password": "password123",
             },
         )
-        # ログインしてトークンを取得
-        login_response = client.post(
-            "/auth/login",
-            json={
-                "email": "test@example.com",
-                "password": "password123",
-            },
-        )
-        token = login_response.json()["data"]["access_token"]
+        
+        token = register_response.json()["data"]["access_token"]
 
         # トークンを使って自分の情報を取得
         response = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})

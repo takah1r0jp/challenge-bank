@@ -107,3 +107,18 @@ class ErrorResponse(BaseModel):
 
     success: bool = False
     error: ErrorDetail
+
+
+# ====== トークン ======
+class TokenData(BaseModel):
+    """トークンデータ"""
+
+    access_token: str
+    token_type: str = "bearer"
+
+
+class UserWithToken(UserResponse):
+    """ユーザー情報とトークンを含むレスポンス"""
+
+    access_token: str
+    token_type: str = "bearer"

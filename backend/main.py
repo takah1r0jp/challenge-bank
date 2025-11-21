@@ -7,8 +7,8 @@ from sqlalchemy.exc import IntegrityError
 # 必要なモジュール
 from database import get_db
 from models import User
-from schemas import UserCreate, UserResponse, SuccessResponse, ErrorResponse, ErrorDetail
-from auth import get_password_hash
+from schemas import UserCreate, UserResponse, SuccessResponse, ErrorResponse, ErrorDetail, UserWithToken
+from auth import get_password_hash, create_access_token
 
 app = FastAPI(title="Failure Bank")
 
@@ -99,6 +99,11 @@ def register_user(
     
     # 4. レスポンスを返す
     user_response = UserResponse.model_validate(new_user)        
+
+    # トークン生成
+    access_token = create_access_token(data={"sub": new_user.email})
+    
+    user_response = UserWithToken(**user_response.model_dump(), access_token=access_token)
 
     return {
         "success": True,
