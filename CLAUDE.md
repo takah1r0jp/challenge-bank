@@ -341,6 +341,47 @@ Response (200):
 - [ ] CORS設定の厳密化
 - [ ] 本番環境でのHTTPS必須化
 
+## CI/CD
+
+### GitHub Actions（設定済み✅）
+
+`.github/workflows/ci.yml`でバックエンドの自動テストを実行しています。
+
+#### トリガー
+- `main`ブランチへのpush
+- `develop`ブランチへのpush
+- Pull Request作成時
+
+#### 実行内容
+1. **Ruff Linter**: コード品質チェック
+2. **Ruff Formatter**: フォーマットチェック
+3. **pytest**: テスト実行
+4. **Coverage**: カバレッジレポート生成
+
+#### バッジ（追加推奨）
+README.mdに以下のバッジを追加すると、CI状態が一目でわかります：
+
+```markdown
+![CI](https://github.com/<username>/failure-bank/workflows/CI/badge.svg)
+```
+
+#### ローカルでCIと同じチェックを実行
+```bash
+cd backend
+
+# リンターチェック
+uv run ruff check .
+
+# フォーマットチェック
+uv run ruff format --check .
+
+# テスト実行
+uv run pytest -v
+
+# カバレッジ付きテスト
+uv run pytest --cov=. --cov-report=term
+```
+
 ## デプロイ
 
 ### 本番環境要件
@@ -355,6 +396,11 @@ Response (200):
 2. 環境変数を設定
 3. ビルドコマンド: `uv sync`
 4. 起動コマンド: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+### CD（継続的デプロイ）
+将来的にGitHub Actionsで自動デプロイを設定可能：
+- `main`ブランチへのマージ時に本番環境へ自動デプロイ
+- `develop`ブランチへのマージ時にステージング環境へ自動デプロイ
 
 ## テスト
 
