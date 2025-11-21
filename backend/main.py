@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from auth import create_access_token, get_password_hash, verify_password
+from auth import create_access_token, get_current_user, get_password_hash, verify_password
 
 # 必要なモジュール
 from database import get_db
@@ -139,3 +139,16 @@ def login_user(request_data: UserCreate, db: Session = Depends(get_db)):
     )
 
     return {"success": True, "data": user_response.model_dump(), "message": "Login successful."}
+
+
+# 現在のユーザー情報を取得
+@app.get("/auth/me", response_model=SuccessResponse, status_code=status.HTTP_200_OK)
+def get_me(current_user: User = Depends(get_current_user)):
+    """認証済みユーザーの情報を取得するエンドポイント"""
+    user_response = UserResponse.model_validate(current_user)
+
+    return {
+        "success": True,
+        "data": user_response.model_dump(),
+        "message": "User information retrieved successfully.",
+    }
