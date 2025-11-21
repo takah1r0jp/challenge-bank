@@ -53,8 +53,8 @@ class FailureUpdate(BaseModel):
 class FailureResponse(BaseModel):
     """失敗記録のレスポンス"""
 
-    id: str
-    user_id: str
+    id: UUID
+    user_id: UUID
     content: str
     score: int
     created_at: datetime

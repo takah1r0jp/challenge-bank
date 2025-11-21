@@ -8,8 +8,10 @@ from auth import create_access_token, get_current_user, get_password_hash, verif
 
 # 必要なモジュール
 from database import get_db
-from models import User
+from models import Failure, User
 from schemas import (
+    FailureCreate,
+    FailureResponse,
     SuccessResponse,
     UserCreate,
     UserResponse,
@@ -150,5 +152,40 @@ def get_me(current_user: User = Depends(get_current_user)):
     return {
         "success": True,
         "data": user_response.model_dump(),
+
         "message": "User information retrieved successfully.",
+    }
+
+
+
+# ============ 失敗記録エンドポイント ============
+
+
+# 失敗記録を作成
+@app.post("/failures", status_code=status.HTTP_201_CREATED, response_model=SuccessResponse)
+def create_failure(
+    failure_data: FailureCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """新しい失敗記録を作成するエンドポイント"""
+
+    # 新しい失敗記録を作成
+    new_failure = Failure(
+        user_id=current_user.id,
+        content=failure_data.content,
+        score=failure_data.score,
+    )
+
+    db.add(new_failure)
+    db.commit()
+    db.refresh(new_failure)
+
+    # レスポンスを返す
+    failure_response = FailureResponse.model_validate(new_failure)
+
+    return {
+        "success": True,
+        "data": failure_response.model_dump(),
+        "message": "Failure record created successfully.",
     }
