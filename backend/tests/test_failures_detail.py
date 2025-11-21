@@ -7,7 +7,6 @@ TDDアプローチ:
 3. Refactor: コードを改善する
 """
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 

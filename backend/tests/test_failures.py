@@ -7,7 +7,6 @@ TDDアプローチ:
 3. Refactor: コードを改善する
 """
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -180,7 +179,6 @@ class TestCreateFailure:
         assert data1["user_id"] == data2["user_id"]
 
 
-
 class TestGetFailures:
     """GET /failures のテスト"""
 
@@ -202,7 +200,7 @@ class TestGetFailures:
                 "/failures",
                 headers={"Authorization": f"Bearer {token}"},
                 json={
-                    "content": f"失敗記録{i+1}",
+                    "content": f"失敗記録{i + 1}",
                     "score": (i % 5) + 1,
                 },
             )
@@ -328,7 +326,7 @@ class TestGetFailures:
             client.post(
                 "/failures",
                 headers={"Authorization": f"Bearer {token}"},
-                json={"content": f"失敗{i+1}", "score": 3},
+                json={"content": f"失敗{i + 1}", "score": 3},
             )
 
         # limitを指定して取得
@@ -358,7 +356,7 @@ class TestGetFailures:
             client.post(
                 "/failures",
                 headers={"Authorization": f"Bearer {token}"},
-                json={"content": f"失敗{i+1}", "score": 3},
+                json={"content": f"失敗{i + 1}", "score": 3},
             )
 
         # offset=2で取得

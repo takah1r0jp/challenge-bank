@@ -154,10 +154,8 @@ def get_me(current_user: User = Depends(get_current_user)):
     return {
         "success": True,
         "data": user_response.model_dump(),
-
         "message": "User information retrieved successfully.",
     }
-
 
 
 # ============ 失敗記録エンドポイント ============
@@ -191,7 +189,6 @@ def create_failure(
         "data": failure_response.model_dump(),
         "message": "Failure record created successfully.",
     }
-
 
 
 # 失敗記録一覧を取得
