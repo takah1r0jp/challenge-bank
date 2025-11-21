@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -220,4 +222,36 @@ def get_failures(
         "success": True,
         "data": failures_response,
         "message": "Failure records retrieved successfully.",
+    }
+
+
+# 失敗記録の詳細を取得
+@app.get("/failures/{failure_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+def get_failure_by_id(
+    failure_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """認証済みユーザーの特定の失敗記録を取得するエンドポイント"""
+
+    # 自分の失敗記録のみ取得（他のユーザーの記録は404）
+    failure = (
+        db.query(Failure)
+        .filter(Failure.id == failure_id, Failure.user_id == current_user.id)
+        .first()
+    )
+
+    if not failure:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Failure record not found.",
+        )
+
+    # レスポンスを返す
+    failure_response = FailureResponse.model_validate(failure)
+
+    return {
+        "success": True,
+        "data": failure_response.model_dump(),
+        "message": "Failure record retrieved successfully.",
     }
