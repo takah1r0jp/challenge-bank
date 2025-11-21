@@ -189,3 +189,35 @@ def create_failure(
         "data": failure_response.model_dump(),
         "message": "Failure record created successfully.",
     }
+
+
+
+# 失敗記録一覧を取得
+@app.get("/failures", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+def get_failures(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    limit: int = 20,
+    offset: int = 0,
+):
+    """認証済みユーザーの失敗記録一覧を取得するエンドポイント"""
+
+    # 自分の失敗記録のみを取得（他のユーザーの記録は見えない）
+    failures = (
+        db.query(Failure)
+        .filter(Failure.user_id == current_user.id)
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    # レスポンスを返す
+    failures_response = [
+        FailureResponse.model_validate(failure).model_dump() for failure in failures
+    ]
+
+    return {
+        "success": True,
+        "data": failures_response,
+        "message": "Failure records retrieved successfully.",
+    }
