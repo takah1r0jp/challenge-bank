@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
@@ -12,8 +13,12 @@ from auth import create_access_token, get_current_user, get_password_hash, verif
 from database import get_db
 from models import Failure, User
 from schemas import (
+    CalendarResponse,
+    DayStats,
     FailureCreate,
     FailureResponse,
+    PeriodStats,
+    StatsSummaryResponse,
     FailureUpdate,
     SuccessResponse,
     UserCreate,
@@ -255,6 +260,149 @@ def get_failure_by_id(
     }
 
 
+# ====== 統計エンドポイント ======
+
+
+# 統計サマリーを取得
+@app.get("/stats/summary", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+def get_stats_summary(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """認証済みユーザーの統計サマリーを取得するエンドポイント"""
+
+    # 日本時間のタイムゾーン（JST = UTC+9）
+    jst = timezone(timedelta(hours=9))
+
+    # 現在の日本時間
+    now_jst = datetime.now(jst)
+
+    # 今週の開始日（日本時間の月曜日0時）
+    week_start_jst = now_jst - timedelta(days=now_jst.weekday())
+    week_start_jst = week_start_jst.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # 今月の開始日（日本時間の1日0時）
+    month_start_jst = now_jst.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # JSTをUTCに変換（DBと比較するため、tzinfo=Noneで取得）
+    week_start_utc = week_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
+    month_start_utc = month_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
+
+    # 自分の失敗記録を取得
+    all_failures = db.query(Failure).filter(Failure.user_id == current_user.id).all()
+
+    # 今週の失敗記録（UTCで比較）
+    this_week_failures = [f for f in all_failures if f.created_at >= week_start_utc]
+
+    # 今月の失敗記録（UTCで比較）
+    this_month_failures = [f for f in all_failures if f.created_at >= month_start_utc]
+
+    # ヘルパー関数: 期間別の統計を計算
+    def calculate_period_stats(failures_list):
+        if not failures_list:
+            return PeriodStats(failure_count=0, total_score=0, average_score=0.0)
+
+        failure_count = len(failures_list)
+        total_score = sum(f.score for f in failures_list)
+        average_score = total_score / failure_count if failure_count > 0 else 0.0
+
+        return PeriodStats(
+            failure_count=failure_count, total_score=total_score, average_score=average_score
+        )
+
+    # 各期間の統計を計算
+    all_time_stats = calculate_period_stats(all_failures)
+    this_week_stats = calculate_period_stats(this_week_failures)
+    this_month_stats = calculate_period_stats(this_month_failures)
+
+    stats_response = StatsSummaryResponse(
+        all_time=all_time_stats, this_week=this_week_stats, this_month=this_month_stats
+    )
+
+    return {
+        "success": True,
+        "data": stats_response.model_dump(),
+        "message": "Statistics summary retrieved successfully.",
+    }
+
+
+# カレンダーデータを取得
+@app.get("/stats/calendar", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+def get_calendar(
+    year: int,
+    month: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """認証済みユーザーの指定月のカレンダーデータを取得するエンドポイント"""
+
+    # 月のバリデーション
+    if month < 1 or month > 12:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Month must be between 1 and 12.",
+        )
+
+    # 日本時間のタイムゾーン
+    jst = timezone(timedelta(hours=9))
+
+    # 指定月の開始日（日本時間）
+    month_start_jst = datetime(year, month, 1, 0, 0, 0, tzinfo=jst)
+
+    # 指定月の終了日（翌月の1日0時 - 1秒）
+    if month == 12:
+        month_end_jst = datetime(year + 1, 1, 1, 0, 0, 0, tzinfo=jst)
+    else:
+        month_end_jst = datetime(year, month + 1, 1, 0, 0, 0, tzinfo=jst)
+
+    # JSTをUTCに変換（DBと比較するため）
+    month_start_utc = month_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
+    month_end_utc = month_end_jst.astimezone(timezone.utc).replace(tzinfo=None)
+
+    # 指定月の失敗記録を取得
+    failures = (
+        db.query(Failure)
+        .filter(
+            Failure.user_id == current_user.id,
+            Failure.created_at >= month_start_utc,
+            Failure.created_at < month_end_utc,
+        )
+        .all()
+    )
+
+    # 日付ごとにグループ化
+    from collections import defaultdict
+
+    daily_stats = defaultdict(list)
+
+    for failure in failures:
+        # UTC時刻をJSTに変換して日付を取得
+        created_at_jst = failure.created_at.replace(tzinfo=timezone.utc).astimezone(jst)
+        date_str = created_at_jst.strftime("%Y-%m-%d")
+        daily_stats[date_str].append(failure)
+
+    # 日別統計を計算
+    days_list = []
+    for date_str, failures_on_day in sorted(daily_stats.items()):
+        failure_count = len(failures_on_day)
+        total_score = sum(f.score for f in failures_on_day)
+        average_score = total_score / failure_count if failure_count > 0 else 0.0
+
+        days_list.append(
+            DayStats(
+                date=date_str,
+                failure_count=failure_count,
+                total_score=total_score,
+                average_score=average_score,
+            )
+        )
+
+    calendar_response = CalendarResponse(year=year, month=month, days=days_list)
+
+    return {
+        "success": True,
+        "data": calendar_response.model_dump(),
+        "message": "Calendar data retrieved successfully.",
 # 失敗記録を更新
 @app.put("/failures/{failure_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
 def update_failure(

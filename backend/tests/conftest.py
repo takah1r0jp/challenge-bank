@@ -49,3 +49,21 @@ def client(db: Session) -> Generator[TestClient, None, None]:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function")
+def auth_token(client: TestClient) -> str:
+    """テスト用の認証トークンを提供"""
+    # テスト用ユーザーを登録
+    client.post(
+        "/auth/register",
+        json={"email": "test@example.com", "password": "password123"},
+    )
+
+    # ログインしてトークンを取得
+    response = client.post(
+        "/auth/login",
+        json={"email": "test@example.com", "password": "password123"},
+    )
+
+    return response.json()["data"]["access_token"]

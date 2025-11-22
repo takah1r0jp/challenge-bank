@@ -109,6 +109,42 @@ class ErrorResponse(BaseModel):
     error: ErrorDetail
 
 
+# ====== 統計 ======
+
+
+class PeriodStats(BaseModel):
+    """期間別の統計情報"""
+
+    failure_count: int
+    total_score: int
+    average_score: float
+
+
+class StatsSummaryResponse(BaseModel):
+    """統計サマリーのレスポンス"""
+
+    all_time: PeriodStats
+    this_week: PeriodStats
+    this_month: PeriodStats
+
+
+class DayStats(BaseModel):
+    """日別の統計情報"""
+
+    date: str  # YYYY-MM-DD形式
+    failure_count: int
+    total_score: int
+    average_score: float
+
+
+class CalendarResponse(BaseModel):
+    """カレンダーレスポンス"""
+
+    year: int
+    month: int
+    days: list[DayStats]
+
+
 # ====== トークン ======
 class TokenData(BaseModel):
     """トークンデータ"""
