@@ -109,6 +109,25 @@ class ErrorResponse(BaseModel):
     error: ErrorDetail
 
 
+# ====== 統計 ======
+
+
+class PeriodStats(BaseModel):
+    """期間別の統計情報"""
+
+    failure_count: int
+    total_score: int
+    average_score: float
+
+
+class StatsSummaryResponse(BaseModel):
+    """統計サマリーのレスポンス"""
+
+    all_time: PeriodStats
+    this_week: PeriodStats
+    this_month: PeriodStats
+
+
 # ====== トークン ======
 class TokenData(BaseModel):
     """トークンデータ"""

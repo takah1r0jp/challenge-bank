@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
@@ -14,6 +15,8 @@ from models import Failure, User
 from schemas import (
     FailureCreate,
     FailureResponse,
+    PeriodStats,
+    StatsSummaryResponse,
     SuccessResponse,
     UserCreate,
     UserResponse,
@@ -251,4 +254,70 @@ def get_failure_by_id(
         "success": True,
         "data": failure_response.model_dump(),
         "message": "Failure record retrieved successfully.",
+    }
+
+
+# ====== 統計エンドポイント ======
+
+
+# 統計サマリーを取得
+@app.get("/stats/summary", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+def get_stats_summary(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """認証済みユーザーの統計サマリーを取得するエンドポイント"""
+
+    # 日本時間のタイムゾーン（JST = UTC+9）
+    JST = timezone(timedelta(hours=9))
+
+    # 現在の日本時間
+    now_jst = datetime.now(JST)
+
+    # 今週の開始日（日本時間の月曜日0時）
+    week_start_jst = now_jst - timedelta(days=now_jst.weekday())
+    week_start_jst = week_start_jst.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # 今月の開始日（日本時間の1日0時）
+    month_start_jst = now_jst.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # JSTをUTCに変換（DBと比較するため、tzinfo=Noneで取得）
+    week_start_utc = week_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
+    month_start_utc = month_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
+
+    # 自分の失敗記録を取得
+    all_failures = db.query(Failure).filter(Failure.user_id == current_user.id).all()
+
+    # 今週の失敗記録（UTCで比較）
+    this_week_failures = [f for f in all_failures if f.created_at >= week_start_utc]
+
+    # 今月の失敗記録（UTCで比較）
+    this_month_failures = [f for f in all_failures if f.created_at >= month_start_utc]
+
+    # ヘルパー関数: 期間別の統計を計算
+    def calculate_period_stats(failures_list):
+        if not failures_list:
+            return PeriodStats(failure_count=0, total_score=0, average_score=0.0)
+
+        failure_count = len(failures_list)
+        total_score = sum(f.score for f in failures_list)
+        average_score = total_score / failure_count if failure_count > 0 else 0.0
+
+        return PeriodStats(
+            failure_count=failure_count, total_score=total_score, average_score=average_score
+        )
+
+    # 各期間の統計を計算
+    all_time_stats = calculate_period_stats(all_failures)
+    this_week_stats = calculate_period_stats(this_week_failures)
+    this_month_stats = calculate_period_stats(this_month_failures)
+
+    stats_response = StatsSummaryResponse(
+        all_time=all_time_stats, this_week=this_week_stats, this_month=this_month_stats
+    )
+
+    return {
+        "success": True,
+        "data": stats_response.model_dump(),
+        "message": "Statistics summary retrieved successfully.",
     }
