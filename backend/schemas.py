@@ -128,6 +128,23 @@ class StatsSummaryResponse(BaseModel):
     this_month: PeriodStats
 
 
+class DayStats(BaseModel):
+    """日別の統計情報"""
+
+    date: str  # YYYY-MM-DD形式
+    failure_count: int
+    total_score: int
+    average_score: float
+
+
+class CalendarResponse(BaseModel):
+    """カレンダーレスポンス"""
+
+    year: int
+    month: int
+    days: list[DayStats]
+
+
 # ====== トークン ======
 class TokenData(BaseModel):
     """トークンデータ"""
