@@ -295,3 +295,36 @@ def update_failure(
         "data": failure_response.model_dump(),
         "message": "Failure record updated successfully.",
     }
+
+
+# 失敗記録を削除
+@app.delete("/failures/{failure_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+def delete_failure(
+    failure_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """認証済みユーザーの特定の失敗記録を削除するエンドポイント"""
+
+    # 自分の失敗記録のみ取得（他のユーザーの記録は404）
+    failure = (
+        db.query(Failure)
+        .filter(Failure.id == failure_id, Failure.user_id == current_user.id)
+        .first()
+    )
+
+    if not failure:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Failure record not found.",
+        )
+
+    # 削除実行
+    db.delete(failure)
+    db.commit()
+
+    return {
+        "success": True,
+        "data": None,
+        "message": "Failure record deleted successfully.",
+    }

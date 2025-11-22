@@ -687,3 +687,203 @@ class TestUpdateFailure:
             },
         )
         assert response.status_code == 422
+
+
+class TestDeleteFailure:
+    """DELETE /failures/{failure_id} のテスト"""
+
+    def test_delete_failure_success(self, client: TestClient, db: Session):
+        """正常系: 認証済みユーザーが自分の失敗記録を削除できる"""
+        # ユーザーを登録してトークンを取得
+        register_response = client.post(
+            "/auth/register",
+            json={
+                "email": "test@example.com",
+                "password": "password123",
+            },
+        )
+        token = register_response.json()["data"]["access_token"]
+
+        # 失敗記録を作成
+        create_response = client.post(
+            "/failures",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "content": "削除予定のコンテンツ",
+                "score": 3,
+            },
+        )
+        failure_id = create_response.json()["data"]["id"]
+
+        # 失敗記録を削除
+        response = client.delete(
+            f"/failures/{failure_id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert data["message"] == "Failure record deleted successfully."
+
+        # 削除後、同じIDで取得しようとすると404が返る
+        get_response = client.get(
+            f"/failures/{failure_id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert get_response.status_code == 404
+
+    def test_delete_failure_not_found(self, client: TestClient, db: Session):
+        """異常系: 存在しない失敗記録を削除しようとするとエラー"""
+        # ユーザーを登録してトークンを取得
+        register_response = client.post(
+            "/auth/register",
+            json={
+                "email": "test@example.com",
+                "password": "password123",
+            },
+        )
+        token = register_response.json()["data"]["access_token"]
+
+        # 存在しないIDで削除を試みる
+        fake_id = "00000000-0000-0000-0000-000000000000"
+        response = client.delete(
+            f"/failures/{fake_id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+        assert response.status_code == 404
+        data = response.json()
+        assert data["success"] is False
+        assert data["error"]["message"] == "Failure record not found."
+
+    def test_delete_failure_other_user(self, client: TestClient, db: Session):
+        """異常系: 他のユーザーの失敗記録は削除できない"""
+        # ユーザー1を登録
+        register_response1 = client.post(
+            "/auth/register",
+            json={
+                "email": "user1@example.com",
+                "password": "password123",
+            },
+        )
+        token1 = register_response1.json()["data"]["access_token"]
+
+        # ユーザー2を登録
+        register_response2 = client.post(
+            "/auth/register",
+            json={
+                "email": "user2@example.com",
+                "password": "password123",
+            },
+        )
+        token2 = register_response2.json()["data"]["access_token"]
+
+        # ユーザー1が失敗記録を作成
+        create_response = client.post(
+            "/failures",
+            headers={"Authorization": f"Bearer {token1}"},
+            json={
+                "content": "ユーザー1の失敗",
+                "score": 3,
+            },
+        )
+        failure_id = create_response.json()["data"]["id"]
+
+        # ユーザー2が削除を試みる
+        response = client.delete(
+            f"/failures/{failure_id}",
+            headers={"Authorization": f"Bearer {token2}"},
+        )
+
+        assert response.status_code == 404
+        data = response.json()
+        assert data["success"] is False
+        assert data["error"]["message"] == "Failure record not found."
+
+        # ユーザー1の記録は削除されていないことを確認
+        get_response = client.get(
+            f"/failures/{failure_id}",
+            headers={"Authorization": f"Bearer {token1}"},
+        )
+        assert get_response.status_code == 200
+
+    def test_delete_failure_no_token(self, client: TestClient, db: Session):
+        """異常系: トークンなしで削除できない"""
+        fake_id = "00000000-0000-0000-0000-000000000000"
+        response = client.delete(f"/failures/{fake_id}")
+        assert response.status_code == 401
+
+    def test_delete_failure_invalid_token(self, client: TestClient, db: Session):
+        """異常系: 無効なトークンで削除できない"""
+        fake_id = "00000000-0000-0000-0000-000000000000"
+        response = client.delete(
+            f"/failures/{fake_id}",
+            headers={"Authorization": "Bearer invalid_token"},
+        )
+        assert response.status_code == 401
+
+    def test_delete_failure_invalid_uuid(self, client: TestClient, db: Session):
+        """異常系: 無効なUUID形式の場合エラー"""
+        # ユーザーを登録してトークンを取得
+        register_response = client.post(
+            "/auth/register",
+            json={
+                "email": "test@example.com",
+                "password": "password123",
+            },
+        )
+        token = register_response.json()["data"]["access_token"]
+
+        # 無効なUUID形式で削除を試みる
+        response = client.delete(
+            "/failures/invalid-uuid",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == 422
+
+    def test_delete_failure_multiple_records_remain(self, client: TestClient, db: Session):
+        """正常系: 複数の記録のうち1つだけ削除される"""
+        # ユーザーを登録してトークンを取得
+        register_response = client.post(
+            "/auth/register",
+            json={
+                "email": "test@example.com",
+                "password": "password123",
+            },
+        )
+        token = register_response.json()["data"]["access_token"]
+
+        # 3つの失敗記録を作成
+        failure_ids = []
+        for i in range(3):
+            create_response = client.post(
+                "/failures",
+                headers={"Authorization": f"Bearer {token}"},
+                json={
+                    "content": f"失敗{i + 1}",
+                    "score": 3,
+                },
+            )
+            failure_ids.append(create_response.json()["data"]["id"])
+
+        # 2番目の記録を削除
+        delete_response = client.delete(
+            f"/failures/{failure_ids[1]}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert delete_response.status_code == 200
+
+        # 一覧を取得して2件残っていることを確認
+        list_response = client.get(
+            "/failures",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert list_response.status_code == 200
+        data = list_response.json()
+        assert len(data["data"]) == 2
+        # 削除した記録は含まれていないことを確認
+        remaining_ids = [record["id"] for record in data["data"]]
+        assert failure_ids[1] not in remaining_ids
+        assert failure_ids[0] in remaining_ids
+        assert failure_ids[2] in remaining_ids
