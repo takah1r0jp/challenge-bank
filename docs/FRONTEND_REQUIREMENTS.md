@@ -145,39 +145,47 @@ frontend/
 
 #### 2.1 失敗記録作成 (`/failures/new`)
 
-**フォームフィールド**
-- **失敗内容**（必須）
+**フォームフィールド（MVP版）**
+- **失敗内容（content）**（必須）
   - プレースホルダー: "どんな失敗をしたの？（例: 環境構築で1日溶かした）"
   - テキストエリア（複数行対応）
   - 最大文字数: 1000文字
 
-- **チャレンジ度合い**（必須）
+- **スコア（score）**（必須）
   - ラジオボタンまたはスライダー（1-5段階）
   - ラベル: ★で表す
+  - 説明: "この失敗の価値は？（挑戦度や学びの大きさ）"
 
 **バリデーション**
 - すべてのフィールドが必須
 - 文字数制限チェック
+- スコアは1-5の範囲内
 
 **送信処理**
 - `POST /failures` API呼び出し
 - 成功時: トースト通知 → 失敗一覧ページへリダイレクト
 - 失敗時: エラーメッセージ表示
 
+**Note（将来拡張）**
+Phase 2では以下のフィールドを追加予定：
+- challenge_content（挑戦内容）
+- failure_content（失敗内容）
+- next_action（ネクストアクション）
+- challenge_level（チャレンジ度合い）
+- novelty_level（新しい度合い）
+
 #### 2.2 失敗記録一覧 (`/failures`)
 
-**表示内容**
+**表示内容（MVP版）**
 - 失敗記録のリスト表示（カード形式推奨）
 - 各カードに表示する情報：
-  - 失敗内容（省略形）
-  - チャレンジ度合い（アイコンまたはバッジで視覚化）
-  - 記録日時（相対時間: "3時間前"、"2日前"など）
+  - 失敗内容（content）- 省略形（最初の100文字）
+  - スコア（score）- ★アイコンで視覚化（例: ★★★☆☆）
+  - 記録日時（created_at）- 相対時間表示（"3時間前"、"2日前"など）
   - 詳細ページへのリンク
 
-**機能**
+**機能（MVP版）**
 - ページネーション（1ページ20件）
-- 日付範囲フィルタ（開始日・終了日）
-- チャレンジレベルフィルタ（1-5）
 - ソート（新しい順/古い順）
 
 **UI/UX**
@@ -185,14 +193,18 @@ frontend/
   - メッセージ: "まだ失敗を記録していません"
   - "失敗を記録する" ボタン → `/failures/new`
 
+**Note（Phase 2で追加予定）**
+- 日付範囲フィルタ（開始日・終了日）
+- スコアフィルタ（1-5）
+- 検索機能
+
 #### 2.3 失敗記録詳細 (`/failures/[id]`)
 
-**表示内容**
+**表示内容（MVP版）**
 - すべてのフィールドを完全に表示
-  - 失敗内容
-  - チャレンジ度合い（視覚的表現）
-  - 作成日時
-  - 更新日時（編集された場合のみ）
+  - 失敗内容（content）- 全文表示
+  - スコア（score）- ★アイコンで視覚的表現
+  - 作成日時（created_at）- フルフォーマット表示
 
 **アクション**
 - 編集ボタン → `/failures/[id]/edit`
@@ -367,9 +379,9 @@ Authorization: Bearer <access_token>
 ### エンドポイント一覧
 
 #### 認証
-- `POST /register`: ユーザー登録
-- `POST /login`: ログイン
-- `GET /me`: 認証済みユーザー情報取得
+- `POST /auth/register`: ユーザー登録
+- `POST /auth/login`: ログイン
+- `GET /auth/me`: 認証済みユーザー情報取得
 
 #### 失敗記録
 - `POST /failures`: 失敗記録作成
@@ -378,11 +390,9 @@ Authorization: Bearer <access_token>
 - `PUT /failures/{id}`: 失敗記録更新
 - `DELETE /failures/{id}`: 失敗記録削除
 
-#### 統計
-- `GET /statistics/total`: 累積失敗数取得
-- `GET /statistics/calendar`: カレンダーデータ取得
-- `GET /statistics/weekly`: 週次統計取得
-- `GET /statistics/monthly`: 月次統計取得
+#### 統計（MVP版）
+- `GET /stats/summary`: 統計サマリー取得（全期間、今週、今月）
+- `GET /stats/calendar?year=2024&month=1`: カレンダーデータ取得
 
 ### エラーハンドリング
 
@@ -411,10 +421,13 @@ Authorization: Bearer <access_token>
 ```typescript
 // lib/types/index.ts
 
+// ========== 認証関連の型 ==========
+
 // User型
 export interface User {
   id: string;
   email: string;
+  notification_time?: string; // "HH:MM" 形式（例: "20:00"）
   created_at: string;
 }
 
@@ -424,8 +437,82 @@ export interface Token {
   token_type: string;
 }
 
-// Failure型
+// ========== Failure関連の型（MVP版） ==========
+
+// Failure型（MVP版：contentとscoreのみ）
 export interface Failure {
+  id: string;
+  user_id: string;
+  content: string;       // 失敗内容（MVP版では1つのフィールドに統合）
+  score: number;         // 1-5のスコア（挑戦度や学びの大きさ）
+  created_at: string;
+}
+
+// Failure作成用型（MVP版）
+export interface FailureCreate {
+  content: string;
+  score: number;         // 1-5
+}
+
+// Failure更新用型（MVP版）
+export interface FailureUpdate {
+  content?: string;
+  score?: number;        // 1-5
+}
+
+// ========== API レスポンス型 ==========
+
+// 統一レスポンス型
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+}
+
+// エラーレスポンス型
+export interface ApiError {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+}
+
+// ========== 統計関連の型（MVP版） ==========
+
+// 期間別統計
+export interface PeriodStats {
+  failure_count: number;
+  total_score: number;
+  average_score: number;
+}
+
+// 統計サマリー
+export interface StatsSummary {
+  all_time: PeriodStats;
+  this_week: PeriodStats;
+  this_month: PeriodStats;
+}
+
+// カレンダー日別データ
+export interface DayStats {
+  date: string;          // "YYYY-MM-DD" 形式
+  failure_count: number;
+  total_score: number;
+  average_score: number;
+}
+
+// カレンダーレスポンス
+export interface CalendarStats {
+  year: number;
+  month: number;
+  days: DayStats[];
+}
+
+// ========== Phase 2以降で拡張予定 ==========
+/*
+export interface FailureExtended {
   id: string;
   user_id: string;
   challenge_content: string;
@@ -436,56 +523,7 @@ export interface Failure {
   created_at: string;
   updated_at: string;
 }
-
-// Failure作成/編集用型
-export interface FailureCreate {
-  challenge_content: string;
-  failure_content: string;
-  next_action: string;
-  challenge_level: 1 | 2 | 3;
-  novelty_level: 1 | 2 | 3;
-}
-
-// 失敗一覧レスポンス型
-export interface FailuresResponse {
-  total: number;
-  items: Failure[];
-}
-
-// 統計型
-export interface TotalStats {
-  total_count: number;
-  previous_month_count: number;
-}
-
-export interface CalendarDay {
-  date: string; // "2024-01-01"
-  count: number;
-  average_challenge_level?: number;
-  average_novelty_level?: number;
-}
-
-export interface CalendarStats {
-  year: number;
-  month: number;
-  days: CalendarDay[];
-}
-
-export interface WeeklyStats {
-  weeks: {
-    start_date: string;
-    end_date: string;
-    count: number;
-  }[];
-}
-
-export interface MonthlyStats {
-  months: {
-    year: number;
-    month: number;
-    count: number;
-  }[];
-}
+*/
 ```
 
 ---
@@ -514,8 +552,22 @@ export const loginSchema = z.object({
   password: z.string().min(1, "パスワードを入力してください"),
 });
 
-// 失敗記録スキーマ
+// 失敗記録スキーマ（MVP版：contentとscoreのみ）
 export const failureSchema = z.object({
+  content: z
+    .string()
+    .min(1, "失敗内容を入力してください")
+    .max(1000, "失敗内容は1000文字以内で入力してください"),
+  score: z
+    .number()
+    .int("スコアは整数である必要があります")
+    .min(1, "スコアは1以上である必要があります")
+    .max(5, "スコアは5以下である必要があります"),
+});
+
+// Phase 2以降で拡張予定
+/*
+export const failureSchemaExtended = z.object({
   challenge_content: z
     .string()
     .min(1, "挑戦内容を入力してください")
@@ -531,6 +583,7 @@ export const failureSchema = z.object({
   challenge_level: z.number().int().min(1).max(3),
   novelty_level: z.number().int().min(1).max(3),
 });
+*/
 ```
 
 ---
