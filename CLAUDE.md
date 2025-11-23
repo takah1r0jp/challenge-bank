@@ -25,30 +25,36 @@
 - **メール通知**: SendGrid / Resend
 - **プッシュ通知**: Web Push API（検討中）
 
-## MVP機能（実装予定）
+## MVP機能
 
-### 1. 失敗の記録（Core機能）
-ユーザーが失敗を記録する際に以下の情報を入力：
-
-- **挑戦内容**（テキスト）: "どんな挑戦をしたの？"
-- **失敗内容**（テキスト）: "どんな失敗をしたの？"
-- **ネクストアクション**（テキスト）: "次に何をする？"
-- **チャレンジ度合い**（3段階）: 挑戦の難易度は高かったか？
-- **新しい度合い**（3段階）: 自分にとって新しいことだったか？
-- **記録日時**（自動）
-
-### 2. 通知機能
-- 毎日決まった時間にプッシュ通知/メール送信
-- ユーザーが通知時間を設定可能
-
-### 3. 可視化機能
-- **累積失敗数カウンター**: "貯金"としての総数表示
-- **カレンダービュー**: 記録した日に失敗数とその質を表示
-- **統計グラフ**: 週/月の記録数（折れ線または棒グラフ）
-
-### 4. 認証機能（実装済み✅）
+### 1. 認証機能（実装済み✅）
 - メールアドレス + パスワード認証
 - JWT トークンベース
+- 通知時間設定（notification_time）
+
+### 2. 失敗の記録（実装済み✅）
+ユーザーが失敗を記録する際に以下の情報を入力：
+
+- **失敗内容**（テキスト）: content
+- **スコア**（整数）: score
+- **記録日時**（自動）: created_at
+- **更新日時**（自動）: updated_at
+
+**将来的な拡張候補:**
+- challenge_content（挑戦内容）
+- failure_content（失敗内容の詳細）
+- next_action（ネクストアクション）
+- challenge_level（チャレンジ度合い: 1-3）
+- novelty_level（新しい度合い: 1-3）
+
+### 3. 可視化機能（実装済み✅）
+- **統計サマリー**: 全期間/今週/今月の失敗数・スコア・平均スコア
+- **カレンダービュー**: 指定月の日別統計（失敗数、合計スコア、平均スコア）
+
+### 4. 通知機能（実装予定）
+- メール通知機能（SendGrid/Resend統合）
+- スケジューラー設定（定期実行）
+- ※ notification_timeフィールドは実装済み
 
 ## 技術スタック
 
@@ -77,74 +83,69 @@ backend/
 
 ## 実装状況
 
-### ✅ 実装済み
-- [x] ユーザー登録（`POST /register`）
-- [x] ログイン（`POST /login`）
-- [x] 認証済みユーザー情報取得（`GET /me`）
-- [x] Userモデル
-- [x] Failureモデル（基本構造）
+### ✅ 実装済み（MVP完了）
+**認証機能:**
+- [x] ユーザー登録（`POST /auth/register`）
+- [x] ログイン（`POST /auth/login`）
+- [x] 認証済みユーザー情報取得（`GET /auth/me`）
+- [x] Userモデル（notification_time対応）
 
-### 🚧 実装予定（優先度順）
-1. **失敗記録のCRUD**
-   - [ ] 失敗記録作成（`POST /failures`）
-   - [ ] 失敗記録一覧取得（`GET /failures`）
-   - [ ] 失敗記録詳細取得（`GET /failures/{id}`）
-   - [ ] 失敗記録更新（`PUT /failures/{id}`）
-   - [ ] 失敗記録削除（`DELETE /failures/{id}`）
+**失敗記録CRUD:**
+- [x] 失敗記録作成（`POST /failures`）
+- [x] 失敗記録一覧取得（`GET /failures`）- ページネーション対応
+- [x] 失敗記録詳細取得（`GET /failures/{id}`）
+- [x] 失敗記録更新（`PUT /failures/{id}`）
+- [x] 失敗記録削除（`DELETE /failures/{id}`）
+- [x] Failureモデル（content, score, created_at, updated_at）
 
-2. **Failureモデルの拡張**
+**統計・可視化API:**
+- [x] 統計サマリー取得（`GET /stats/summary`）- 全期間/今週/今月
+- [x] カレンダーデータ取得（`GET /stats/calendar`）- 日別統計、JST対応
+
+### 🚧 今後の実装予定（優先度順）
+1. **フィルタリング・検索機能**
+   - [ ] 日付範囲フィルタ（start_date, end_date）
+   - [ ] ソート機能（日付順、スコア順など）
+
+2. **通知機能**
+   - [ ] メール送信機能（SendGrid/Resend統合）
+   - [ ] スケジューラー設定（定期実行）
+
+3. **Failureモデルの拡張（将来的な機能）**
    - [ ] challenge_content（挑戦内容）
-   - [ ] failure_content（失敗内容）
+   - [ ] failure_content（失敗内容の詳細）
    - [ ] next_action（ネクストアクション）
    - [ ] challenge_level（チャレンジ度合い: 1-3）
    - [ ] novelty_level（新しい度合い: 1-3）
 
-3. **統計・可視化API**
-   - [ ] 累積失敗数取得（`GET /statistics/total`）
-   - [ ] カレンダーデータ取得（`GET /statistics/calendar?year=2024&month=1`）
-   - [ ] 週次/月次統計（`GET /statistics/weekly`, `GET /statistics/monthly`）
-
-4. **通知機能**
-   - [ ] 通知設定モデル（NotificationSettings）
-   - [ ] メール送信機能（SendGrid/Resend統合）
-   - [ ] スケジューラー設定（定期実行）
-
-5. **その他**
-   - [ ] ページネーション実装
-   - [ ] フィルタリング機能（日付範囲、チャレンジレベルなど）
-   - [ ] ソート機能
-
 ## データベースモデル
 
-### User
+### User（実装済み✅）
 ```python
 - id: UUID (PK)
 - email: String (unique)
 - hashed_password: String
+- notification_time: Time (nullable)  # 通知時刻（例: "20:00:00"）
 - created_at: DateTime
 ```
 
-### Failure（拡張予定）
+### Failure（実装済み✅）
 ```python
 - id: UUID (PK)
 - user_id: UUID (FK -> User)
+- content: Text              # 失敗内容
+- score: Integer             # スコア
+- created_at: DateTime       # 記録日時
+- updated_at: DateTime       # 更新日時
+```
+
+**将来的な拡張候補:**
+```python
 - challenge_content: Text      # 挑戦内容
-- failure_content: Text        # 失敗内容
+- failure_content: Text        # 失敗内容の詳細
 - next_action: Text           # ネクストアクション
 - challenge_level: Integer    # 1-3 (チャレンジ度合い)
 - novelty_level: Integer      # 1-3 (新しい度合い)
-- created_at: DateTime        # 記録日時
-- updated_at: DateTime
-```
-
-### NotificationSettings（今後追加）
-```python
-- id: UUID (PK)
-- user_id: UUID (FK -> User)
-- notification_time: Time     # 通知時刻
-- notification_enabled: Boolean
-- notification_method: Enum   # email, push, both
-- timezone: String
 ```
 
 ## 開発ガイドライン
@@ -166,19 +167,22 @@ def test_create_failure(client, auth_token):
         "/failures",
         headers={"Authorization": f"Bearer {auth_token}"},
         json={
-            "challenge_content": "新しい言語を学ぶ",
-            "failure_content": "環境構築で詰まった",
-            "next_action": "公式ドキュメントを読む",
-            "challenge_level": 2,
-            "novelty_level": 3
+            "content": "新しい言語の環境構築で詰まった",
+            "score": 5
         }
     )
     assert response.status_code == 201
-    assert response.json()["challenge_content"] == "新しい言語を学ぶ"
+    data = response.json()["data"]
+    assert data["content"] == "新しい言語の環境構築で詰まった"
+    assert data["score"] == 5
 
 # 2. テストが通るようにエンドポイントを実装（main.py）
-@app.post("/failures", response_model=FailureResponse, status_code=201)
-async def create_failure(failure: FailureCreate, current_user: User = Depends(get_current_user)):
+@app.post("/failures", response_model=SuccessResponse, status_code=201)
+def create_failure(
+    failure_data: FailureCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     # 実装...
     pass
 
@@ -236,23 +240,31 @@ ruff check .
 
 ### 認証エンドポイント
 
-#### POST /register
+#### POST /auth/register
 ユーザー登録
 ```json
 Request:
 {
   "email": "user@example.com",
-  "password": "password123"
+  "password": "password123",
+  "notification_time": "20:00:00"  // optional
 }
 
 Response (201):
 {
-  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-  "token_type": "bearer"
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "user@example.com",
+    "notification_time": "20:00:00",
+    "created_at": "2024-01-01T00:00:00",
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+  },
+  "message": "User registered successfully."
 }
 ```
 
-#### POST /login
+#### POST /auth/login
 ログイン
 ```json
 Request:
@@ -263,67 +275,192 @@ Request:
 
 Response (200):
 {
-  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-  "token_type": "bearer"
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "user@example.com",
+    "notification_time": "20:00:00",
+    "created_at": "2024-01-01T00:00:00",
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+  },
+  "message": "Login successful."
 }
 ```
 
-#### GET /me
+#### GET /auth/me
 認証済みユーザー情報取得（要認証）
-```
+```json
 Headers:
   Authorization: Bearer <token>
 
 Response (200):
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "user@example.com",
-  "created_at": "2024-01-01T00:00:00"
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "user@example.com",
+    "notification_time": "20:00:00",
+    "created_at": "2024-01-01T00:00:00"
+  },
+  "message": "User information retrieved successfully."
 }
 ```
 
-### 失敗記録エンドポイント（実装予定）
+### 失敗記録エンドポイント
 
 #### POST /failures
 失敗記録作成（要認証）
 ```json
 Request:
 {
-  "challenge_content": "新しいプログラミング言語でWebアプリを作る",
-  "failure_content": "環境構築でつまずいて1日溶かした",
-  "next_action": "公式ドキュメントを最初から読み直す",
-  "challenge_level": 3,
-  "novelty_level": 3
+  "content": "新しい言語の環境構築で詰まった",
+  "score": 5
 }
 
 Response (201):
 {
-  "id": "...",
-  "user_id": "...",
-  "challenge_content": "...",
-  "failure_content": "...",
-  "next_action": "...",
-  "challenge_level": 3,
-  "novelty_level": 3,
-  "created_at": "2024-01-01T12:00:00",
-  "updated_at": "2024-01-01T12:00:00"
+  "success": true,
+  "data": {
+    "id": "...",
+    "user_id": "...",
+    "content": "新しい言語の環境構築で詰まった",
+    "score": 5,
+    "created_at": "2024-01-01T12:00:00",
+    "updated_at": "2024-01-01T12:00:00"
+  },
+  "message": "Failure record created successfully."
 }
 ```
 
 #### GET /failures
 失敗記録一覧取得（要認証）
-```
+```json
 Query Parameters:
   - limit: int (default: 20)
   - offset: int (default: 0)
-  - start_date: date (optional)
-  - end_date: date (optional)
-  - challenge_level: int (optional, 1-3)
 
 Response (200):
 {
-  "total": 100,
-  "items": [...]
+  "success": true,
+  "data": [
+    {
+      "id": "...",
+      "user_id": "...",
+      "content": "...",
+      "score": 5,
+      "created_at": "2024-01-01T12:00:00",
+      "updated_at": "2024-01-01T12:00:00"
+    }
+  ],
+  "message": "Failure records retrieved successfully."
+}
+```
+
+#### GET /failures/{failure_id}
+失敗記録詳細取得（要認証）
+```json
+Response (200):
+{
+  "success": true,
+  "data": {
+    "id": "...",
+    "user_id": "...",
+    "content": "...",
+    "score": 5,
+    "created_at": "2024-01-01T12:00:00",
+    "updated_at": "2024-01-01T12:00:00"
+  },
+  "message": "Failure record retrieved successfully."
+}
+```
+
+#### PUT /failures/{failure_id}
+失敗記録更新（要認証）
+```json
+Request:
+{
+  "content": "更新された内容",  // optional
+  "score": 7  // optional
+}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "id": "...",
+    "user_id": "...",
+    "content": "更新された内容",
+    "score": 7,
+    "created_at": "2024-01-01T12:00:00",
+    "updated_at": "2024-01-02T10:00:00"
+  },
+  "message": "Failure record updated successfully."
+}
+```
+
+#### DELETE /failures/{failure_id}
+失敗記録削除（要認証）
+```json
+Response (200):
+{
+  "success": true,
+  "data": null,
+  "message": "Failure record deleted successfully."
+}
+```
+
+### 統計エンドポイント
+
+#### GET /stats/summary
+統計サマリー取得（要認証）
+```json
+Response (200):
+{
+  "success": true,
+  "data": {
+    "all_time": {
+      "failure_count": 100,
+      "total_score": 500,
+      "average_score": 5.0
+    },
+    "this_week": {
+      "failure_count": 5,
+      "total_score": 25,
+      "average_score": 5.0
+    },
+    "this_month": {
+      "failure_count": 20,
+      "total_score": 100,
+      "average_score": 5.0
+    }
+  },
+  "message": "Statistics summary retrieved successfully."
+}
+```
+
+#### GET /stats/calendar
+カレンダーデータ取得（要認証）
+```json
+Query Parameters:
+  - year: int (required)
+  - month: int (required, 1-12)
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "year": 2024,
+    "month": 1,
+    "days": [
+      {
+        "date": "2024-01-15",
+        "failure_count": 3,
+        "total_score": 15,
+        "average_score": 5.0
+      }
+    ]
+  },
+  "message": "Calendar data retrieved successfully."
 }
 ```
 
@@ -432,9 +569,9 @@ pytest-watch
 ```
 backend/tests/
 ├── conftest.py           # テストフィクスチャ
-├── test_auth.py          # 認証エンドポイントのテスト
-├── test_failures.py      # 失敗記録エンドポイントのテスト（実装予定）
-└── test_statistics.py    # 統計エンドポイントのテスト（実装予定）
+├── test_auth.py          # 認証エンドポイントのテスト（実装済み）
+├── test_failures.py      # 失敗記録エンドポイントのテスト（実装済み）
+└── test_stats.py         # 統計エンドポイントのテスト（実装済み）
 ```
 
 ## 今後の改善・拡張アイデア
