@@ -216,9 +216,10 @@ class TestGetFailures:
         assert data["success"] is True
         assert isinstance(data["data"], list)
         assert len(data["data"]) == 3
-        assert data["data"][0]["content"] == "失敗記録1"
+        # 新しい順（降順）で返される
+        assert data["data"][0]["content"] == "失敗記録3"
         assert data["data"][1]["content"] == "失敗記録2"
-        assert data["data"][2]["content"] == "失敗記録3"
+        assert data["data"][2]["content"] == "失敗記録1"
 
     def test_get_failures_empty(self, client: TestClient, db: Session):
         """正常系: 失敗記録がない場合は空配列を返す"""
