@@ -174,3 +174,85 @@ class TestGetCurrentUser:
         """異常系: 無効なトークンでアクセスできない"""
         response = client.get("/auth/me", headers={"Authorization": "Bearer invalid_token"})
         assert response.status_code == 401
+
+
+class TestUpdateUser:
+    """PUT /auth/me のテスト"""
+
+    def test_update_notification_time_success(self, client: TestClient, db: Session):
+        """正常系: notification_timeを更新できる"""
+        # ユーザーを登録
+        register_response = client.post(
+            "/auth/register",
+            json={
+                "email": "test@example.com",
+                "password": "password123",
+                "notification_time": "20:00",
+            },
+        )
+        token = register_response.json()["data"]["access_token"]
+
+        # notification_timeを更新
+        response = client.put(
+            "/auth/me",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"notification_time": "09:30"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert data["data"]["notification_time"] == "09:30"
+        assert data["data"]["email"] == "test@example.com"
+
+    def test_update_notification_time_invalid_format(self, client: TestClient, db: Session):
+        """異常系: 無効な時刻フォーマットで更新できない"""
+        # ユーザーを登録
+        register_response = client.post(
+            "/auth/register",
+            json={
+                "email": "test@example.com",
+                "password": "password123",
+            },
+        )
+        token = register_response.json()["data"]["access_token"]
+
+        # 無効なフォーマットで更新を試みる
+        response = client.put(
+            "/auth/me",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"notification_time": "25:00"},  # 25時は存在しない
+        )
+        assert response.status_code == 422  # Validation error
+
+    def test_update_no_token(self, client: TestClient, db: Session):
+        """異常系: トークンなしで更新できない"""
+        response = client.put("/auth/me", json={"notification_time": "09:30"})
+        assert response.status_code == 401
+
+
+class TestLogout:
+    """POST /auth/logout のテスト"""
+
+    def test_logout_success(self, client: TestClient, db: Session):
+        """正常系: ログアウトが成功する"""
+        # ユーザーを登録
+        register_response = client.post(
+            "/auth/register",
+            json={
+                "email": "test@example.com",
+                "password": "password123",
+            },
+        )
+        token = register_response.json()["data"]["access_token"]
+
+        # ログアウト
+        response = client.post("/auth/logout", headers={"Authorization": f"Bearer {token}"})
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert "logout" in data["message"].lower()
+
+    def test_logout_no_token(self, client: TestClient, db: Session):
+        """異常系: トークンなしでログアウトできない"""
+        response = client.post("/auth/logout")
+        assert response.status_code == 401

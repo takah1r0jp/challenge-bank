@@ -1,10 +1,13 @@
+import os
 from collections.abc import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-# PostgreSQLのデータベースURL
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://ttaka:postgres@localhost/failure_bank"
+# PostgreSQLのデータベースURL（環境変数から取得）
+SQLALCHEMY_DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql+psycopg2://ttaka:postgres@localhost/failure_bank"
+)
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,

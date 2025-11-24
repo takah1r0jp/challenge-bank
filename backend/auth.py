@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 
 import jwt
@@ -10,9 +11,9 @@ from database import get_db
 from models import User
 
 # 設定
-SECRET_KEY = "your-secret-key-change-this-in-production-2025"  # 本番では環境変数にする
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-this-in-production-2025")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 14400  # 10日（14400分）
 
 
 # パスワードハッシュ化
