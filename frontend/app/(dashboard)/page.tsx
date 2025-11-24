@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { FailureCard } from "@/components/dashboard/FailureCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { Plus } from "lucide-react";
 
 /**
  * ダッシュボードページ
@@ -52,13 +53,11 @@ export default function DashboardPage() {
         // 並列でAPIを呼び出し
         const [statsResponse, failuresResponse] = await Promise.all([
           apiClient.get<ApiResponse<StatsSummary>>("/stats/summary"),
-          apiClient.get<ApiResponse<{ items: Failure[]; total: number }>>(
-            "/failures?limit=5"
-          ),
+          apiClient.get<ApiResponse<Failure[]>>("/failures?limit=5"),
         ]);
 
         setStats(statsResponse.data.data);
-        setRecentFailures(failuresResponse.data.data.items || []);
+        setRecentFailures(failuresResponse.data.data || []);
       } catch (error) {
         console.error("データ取得エラー:", getErrorMessage(error));
       } finally {
@@ -98,8 +97,9 @@ export default function DashboardPage() {
           </p>
         </div>
         <Link href="/failures/new">
-          <Button size="lg" className="text-lg">
-            ➕ 新しい失敗を記録する
+          <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="mr-2 h-5 w-5" />
+            新しい失敗を記録
           </Button>
         </Link>
       </div>

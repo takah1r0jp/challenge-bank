@@ -208,9 +208,11 @@ def get_failures(
     """認証済みユーザーの失敗記録一覧を取得するエンドポイント"""
 
     # 自分の失敗記録のみを取得（他のユーザーの記録は見えない）
+    # 新しい順（作成日時の降順）でソート
     failures = (
         db.query(Failure)
         .filter(Failure.user_id == current_user.id)
+        .order_by(Failure.created_at.desc())
         .offset(offset)
         .limit(limit)
         .all()

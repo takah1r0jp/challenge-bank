@@ -1,14 +1,19 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Failure } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
+import { Pencil, Trash2 } from "lucide-react";
 
 /**
  * 失敗記録カードのProps
  */
 interface FailureCardProps {
   failure: Failure;
+  showActions?: boolean; // 編集・削除ボタンを表示するかどうか
+  onEdit?: (id: string) => void; // 編集ボタンのクリックハンドラ
+  onDelete?: (id: string) => void; // 削除ボタンのクリックハンドラ
 }
 
 /**
@@ -25,7 +30,7 @@ function renderStars(score: number): string {
  * 失敗記録カードコンポーネント
  * 失敗内容（省略形）、スコア、相対時間を表示
  */
-export function FailureCard({ failure }: FailureCardProps) {
+export function FailureCard({ failure, showActions = false, onEdit, onDelete }: FailureCardProps) {
   // 失敗内容を最初の100文字に省略
   const truncatedContent =
     failure.content.length > 100
@@ -38,6 +43,62 @@ export function FailureCard({ failure }: FailureCardProps) {
     locale: ja,
   });
 
+  // アクションボタンがある場合は、カード全体をリンクにしない
+  if (showActions) {
+    return (
+      <Card className="transition-shadow hover:shadow-md">
+        <CardContent className="p-4">
+          {/* 失敗内容（省略形） */}
+          <Link href={`/failures/${failure.id}`} className="block hover:text-blue-600">
+            <p className="text-sm text-gray-700">{truncatedContent}</p>
+          </Link>
+
+          {/* スコア、時間、アクションボタン */}
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3">
+              {/* スコア（星で表示） */}
+              <span className="text-lg text-yellow-500">
+                {renderStars(failure.score)}
+              </span>
+
+              {/* 相対時間 */}
+              <span className="text-xs text-gray-500">{relativeTime}</span>
+            </div>
+
+            {/* アクションボタン */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(failure.id);
+                }}
+                className="h-8 w-8 p-0"
+                aria-label="編集"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.(failure.id);
+                }}
+                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                aria-label="削除"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // アクションボタンがない場合は、従来通りカード全体をリンクにする
   return (
     <Link href={`/failures/${failure.id}`}>
       <Card className="cursor-pointer transition-shadow hover:shadow-md">
