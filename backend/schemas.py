@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, time
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 # ======User関連=======
 
@@ -13,6 +13,19 @@ class UserCreate(BaseModel):
     password: str = Field(min_length=8)
     notification_time: str | None = "20:00"
 
+    @field_validator("notification_time")
+    @classmethod
+    def validate_notification_time(cls, v: str | None) -> str | None:
+        """notification_timeのバリデーション（HH:MM形式をチェック）"""
+        if v is None:
+            return v
+        try:
+            # HH:MMフォーマットを検証
+            time.fromisoformat(v)
+            return v
+        except ValueError as e:
+            raise ValueError("notification_time must be in HH:MM format (e.g., '20:00')") from e
+
 
 class UserUpdate(BaseModel):
     """ユーザー情報更新時の入力"""
@@ -20,6 +33,19 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
     password: str | None = Field(default=None, min_length=8)
     notification_time: str | None = None
+
+    @field_validator("notification_time")
+    @classmethod
+    def validate_notification_time(cls, v: str | None) -> str | None:
+        """notification_timeのバリデーション（HH:MM形式をチェック）"""
+        if v is None:
+            return v
+        try:
+            # HH:MMフォーマットを検証
+            time.fromisoformat(v)
+            return v
+        except ValueError as e:
+            raise ValueError("notification_time must be in HH:MM format (e.g., '20:00')") from e
 
 
 class UserResponse(BaseModel):

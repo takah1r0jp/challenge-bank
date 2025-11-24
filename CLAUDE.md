@@ -17,8 +17,8 @@
 ### バックエンド（backend/）
 - **Framework**: FastAPI 0.121.1+
 - **ORM**: SQLAlchemy 2.0.44+
-- **Database**: PostgreSQL（開発環境ではSQLite）
-- **認証**: JWT + Argon2パスワードハッシュ
+- **Database**: PostgreSQL
+- **認証**: JWT + Argon2パスワードハッシュ（トークン有効期限: 10日）
 - **Deploy**: Render / Railway
 
 ### 通知
@@ -59,9 +59,9 @@
 ## 技術スタック
 
 - **Framework**: FastAPI 0.121.1+
-- **Database**: PostgreSQL（開発環境ではSQLite）
+- **Database**: PostgreSQL
 - **ORM**: SQLAlchemy 2.0.44+
-- **認証**: JWT + Argon2パスワードハッシュ
+- **認証**: JWT + Argon2パスワードハッシュ（トークン有効期限: 10日）
 - **テスト**: pytest + httpx
 - **コード品質**: Ruff
 - **パッケージ管理**: uv
@@ -88,7 +88,10 @@ backend/
 - [x] ユーザー登録（`POST /auth/register`）
 - [x] ログイン（`POST /auth/login`）
 - [x] 認証済みユーザー情報取得（`GET /auth/me`）
+- [x] ユーザー情報更新（`PUT /auth/me`）- notification_time更新対応
+- [x] ログアウト（`POST /auth/logout`）- クライアント側トークン削除方式
 - [x] Userモデル（notification_time対応）
+- [x] 環境変数化（JWT_SECRET_KEY, DATABASE_URL）
 
 **失敗記録CRUD:**
 - [x] 失敗記録作成（`POST /failures`）
@@ -306,6 +309,47 @@ Response (200):
 }
 ```
 
+#### PUT /auth/me
+ユーザー情報更新（要認証）
+```json
+Headers:
+  Authorization: Bearer <token>
+
+Request:
+{
+  "notification_time": "09:30"  // HH:MM形式（必須）
+}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "user@example.com",
+    "notification_time": "09:30",
+    "created_at": "2024-01-01T00:00:00"
+  },
+  "message": "User information updated successfully."
+}
+```
+
+#### POST /auth/logout
+ログアウト（要認証）
+```json
+Headers:
+  Authorization: Bearer <token>
+
+Response (200):
+{
+  "success": true,
+  "data": null,
+  "message": "Logout successful. Please remove the token from the client."
+}
+
+Note: JWTはステートレスなため、サーバー側では何も処理しません。
+クライアント側でトークンを削除することでログアウトを実現してください。
+```
+
 ### 失敗記録エンドポイント
 
 #### POST /failures
@@ -468,11 +512,13 @@ Response (200):
 
 ### 実装済み
 - パスワードはArgon2でハッシュ化
-- JWT認証による保護されたエンドポイント
+- JWT認証による保護されたエンドポイント（トークン有効期限: 10日）
 - メールアドレスのバリデーション
+- notification_timeのバリデーション（HH:MM形式）
+- JWTシークレットキーの環境変数化（`JWT_SECRET_KEY`）
+- データベース接続URLの環境変数化（`DATABASE_URL`）
 
 ### 改善予定
-- [ ] JWTシークレットキーを環境変数で管理（現在はハードコード）
 - [ ] JWTリフレッシュトークン実装
 - [ ] レート制限（Rate Limiting）
 - [ ] CORS設定の厳密化
@@ -580,8 +626,9 @@ backend/tests/
 - [ ] タグ・カテゴリ機能（失敗をカテゴリ分け）
 - [ ] 検索機能（全文検索）
 - [ ] エクスポート機能（CSV、JSON）
-- [ ] プロフィール編集機能
-- [ ] パスワードリセット機能
+- [ ] パスワード変更機能（現在のパスワード確認後に変更）
+- [ ] メールアドレス変更機能（メール検証付き）
+- [ ] パスワードリセット機能（メール送信）
 
 ### Phase 3（長期的な拡張）
 - [ ] ソーシャル機能（失敗の共有、コミュニティ）

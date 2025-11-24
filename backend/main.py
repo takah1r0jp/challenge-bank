@@ -23,6 +23,7 @@ from schemas import (
     SuccessResponse,
     UserCreate,
     UserResponse,
+    UserUpdate,
     UserWithToken,
 )
 
@@ -161,6 +162,50 @@ def get_me(current_user: User = Depends(get_current_user)):
         "success": True,
         "data": user_response.model_dump(),
         "message": "User information retrieved successfully.",
+    }
+
+
+# ユーザー情報を更新
+@app.put("/auth/me", response_model=SuccessResponse, status_code=status.HTTP_200_OK)
+def update_me(
+    user_data: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """認証済みユーザーの情報を更新するエンドポイント"""
+    # notification_timeのみ更新可能（将来的にemailやpasswordも追加可能）
+    if user_data.notification_time is not None:
+        current_user.notification_time = user_data.notification_time
+
+    try:
+        db.commit()
+        db.refresh(current_user)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Database integrity error occurred during user update.",
+        )
+
+    user_response = UserResponse.model_validate(current_user)
+
+    return {
+        "success": True,
+        "data": user_response.model_dump(),
+        "message": "User information updated successfully.",
+    }
+
+
+# ログアウト
+@app.post("/auth/logout", response_model=SuccessResponse, status_code=status.HTTP_200_OK)
+def logout_user(current_user: User = Depends(get_current_user)):
+    """ログアウトエンドポイント（クライアント側でトークンを削除する方式）"""
+    # JWTはステートレスなので、サーバー側では何もしない
+    # クライアント側でトークンを削除することでログアウトを実現
+    return {
+        "success": True,
+        "data": None,
+        "message": "Logout successful. Please remove the token from the client.",
     }
 
 
