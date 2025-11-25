@@ -1,0 +1,347 @@
+/* Material Design 3 Button Variants Template */
+
+/* ============================================
+   BUTTON TYPES
+   ============================================ */
+
+/* 1. FILLED BUTTON - High emphasis */
+.md-button-filled {
+  /* Container */
+  background-color: var(--md-sys-color-primary);
+  border: none;
+  border-radius: var(--md-shape-corner-full);
+  padding: 10px 24px;
+  min-height: 40px;
+
+  /* Label */
+  color: var(--md-sys-color-on-primary);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+
+  /* Interaction */
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* State layer - Hover */
+.md-button-filled:hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--md-sys-color-on-primary);
+  opacity: 0.08;
+  border-radius: inherit;
+}
+
+/* State layer - Focus */
+.md-button-filled:focus::before {
+  opacity: 0.12;
+}
+
+/* State layer - Pressed */
+.md-button-filled:active::before {
+  opacity: 0.12;
+}
+
+/* Elevation - Pressed */
+.md-button-filled:active {
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3),
+              0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+}
+
+/* Disabled state */
+.md-button-filled:disabled {
+  background-color: rgba(var(--md-sys-color-on-surface-rgb), 0.12);
+  color: rgba(var(--md-sys-color-on-surface-rgb), 0.38);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 2. OUTLINED BUTTON - Medium emphasis */
+.md-button-outlined {
+  /* Container */
+  background-color: transparent;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-shape-corner-full);
+  padding: 10px 24px;
+  min-height: 40px;
+
+  /* Label */
+  color: var(--md-sys-color-primary);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+
+  /* Interaction */
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-button-outlined:hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--md-sys-color-primary);
+  opacity: 0.08;
+  border-radius: inherit;
+}
+
+.md-button-outlined:focus::before {
+  opacity: 0.12;
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.md-button-outlined:active::before {
+  opacity: 0.12;
+}
+
+.md-button-outlined:disabled {
+  border-color: rgba(var(--md-sys-color-on-surface-rgb), 0.12);
+  color: rgba(var(--md-sys-color-on-surface-rgb), 0.38);
+  cursor: not-allowed;
+}
+
+/* 3. TEXT BUTTON - Low emphasis */
+.md-button-text {
+  /* Container */
+  background-color: transparent;
+  border: none;
+  border-radius: var(--md-shape-corner-full);
+  padding: 10px 12px;
+  min-height: 40px;
+
+  /* Label */
+  color: var(--md-sys-color-primary);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+
+  /* Interaction */
+  position: relative;
+  cursor: pointer;
+}
+
+.md-button-text:hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--md-sys-color-primary);
+  opacity: 0.08;
+  border-radius: inherit;
+}
+
+.md-button-text:focus::before {
+  opacity: 0.12;
+}
+
+.md-button-text:active::before {
+  opacity: 0.12;
+}
+
+.md-button-text:disabled {
+  color: rgba(var(--md-sys-color-on-surface-rgb), 0.38);
+  cursor: not-allowed;
+}
+
+/* 4. ELEVATED BUTTON - Alternative high emphasis */
+.md-button-elevated {
+  /* Container */
+  background-color: var(--md-sys-color-surface-container-low);
+  border: none;
+  border-radius: var(--md-shape-corner-full);
+  padding: 10px 24px;
+  min-height: 40px;
+
+  /* Label */
+  color: var(--md-sys-color-primary);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+
+  /* Elevation */
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3),
+              0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+
+  /* Interaction */
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-button-elevated:hover {
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3),
+              0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+}
+
+.md-button-elevated:hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--md-sys-color-primary);
+  opacity: 0.08;
+  border-radius: inherit;
+}
+
+.md-button-elevated:focus::before {
+  opacity: 0.12;
+}
+
+.md-button-elevated:active {
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3),
+              0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+}
+
+.md-button-elevated:active::before {
+  opacity: 0.12;
+}
+
+.md-button-elevated:disabled {
+  background-color: rgba(var(--md-sys-color-on-surface-rgb), 0.12);
+  color: rgba(var(--md-sys-color-on-surface-rgb), 0.38);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* 5. TONAL BUTTON - Medium-low emphasis */
+.md-button-tonal {
+  /* Container */
+  background-color: var(--md-sys-color-secondary-container);
+  border: none;
+  border-radius: var(--md-shape-corner-full);
+  padding: 10px 24px;
+  min-height: 40px;
+
+  /* Label */
+  color: var(--md-sys-color-on-secondary-container);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+
+  /* Interaction */
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.md-button-tonal:hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--md-sys-color-on-secondary-container);
+  opacity: 0.08;
+  border-radius: inherit;
+}
+
+.md-button-tonal:focus::before {
+  opacity: 0.12;
+}
+
+.md-button-tonal:active::before {
+  opacity: 0.12;
+}
+
+.md-button-tonal:disabled {
+  background-color: rgba(var(--md-sys-color-on-surface-rgb), 0.12);
+  color: rgba(var(--md-sys-color-on-surface-rgb), 0.38);
+  cursor: not-allowed;
+}
+
+/* ============================================
+   BUTTON WITH ICON
+   ============================================ */
+
+.md-button-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.md-button-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Icon-only variant */
+.md-icon-button {
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: transparent;
+  border-radius: var(--md-shape-corner-full);
+  color: var(--md-sys-color-on-surface-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.md-icon-button:hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--md-sys-color-on-surface-variant);
+  opacity: 0.08;
+  border-radius: inherit;
+}
+
+.md-icon-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ============================================
+   USAGE EXAMPLES (HTML)
+   ============================================ */
+
+/*
+<!-- Filled Button -->
+<button class="md-button-filled">
+  <span>Filled</span>
+</button>
+
+<!-- Outlined Button -->
+<button class="md-button-outlined">
+  <span>Outlined</span>
+</button>
+
+<!-- Text Button -->
+<button class="md-button-text">
+  <span>Text</span>
+</button>
+
+<!-- Elevated Button -->
+<button class="md-button-elevated">
+  <span>Elevated</span>
+</button>
+
+<!-- Tonal Button -->
+<button class="md-button-tonal">
+  <span>Tonal</span>
+</button>
+
+<!-- Button with Icon -->
+<button class="md-button-filled md-button-with-icon">
+  <svg class="md-button-icon" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+  </svg>
+  <span>Add Item</span>
+</button>
+
+<!-- Icon Button -->
+<button class="md-icon-button" aria-label="Favorite">
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+  </svg>
+</button>
+
+<!-- Disabled Button -->
+<button class="md-button-filled" disabled>
+  <span>Disabled</span>
+</button>
+*/
