@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { FailureCard } from "@/components/dashboard/FailureCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
-import { Plus } from "lucide-react";
+import { WeeklyTrendChart } from "@/components/dashboard/WeeklyTrendChart";
+import { ScoreDistributionChart } from "@/components/dashboard/ScoreDistributionChart";
+import { CalendarHeatmap } from "@/components/dashboard/CalendarHeatmap";
+import { Plus, Clock, Calendar as CalendarIcon, TrendingUp } from "lucide-react";
 
 /**
  * ダッシュボードページ
@@ -111,12 +114,43 @@ export default function DashboardPage() {
             📊 統計サマリー
           </h2>
           <div className="grid gap-4 md:grid-cols-3">
-            <StatsCard title="全期間" stats={stats.all_time} />
-            <StatsCard title="今週" stats={stats.this_week} />
-            <StatsCard title="今月" stats={stats.this_month} />
+            <StatsCard
+              title="全期間"
+              stats={stats.all_time}
+              icon={<TrendingUp className="h-5 w-5" />}
+              delay={0}
+            />
+            <StatsCard
+              title="今週"
+              stats={stats.this_week}
+              icon={<Clock className="h-5 w-5" />}
+              delay={0.1}
+            />
+            <StatsCard
+              title="今月"
+              stats={stats.this_month}
+              icon={<CalendarIcon className="h-5 w-5" />}
+              delay={0.2}
+            />
           </div>
         </div>
       )}
+
+      {/* アナリティクスチャート（Material Design 3） */}
+      <div>
+        <h2 className="mb-4 text-xl font-semibold text-gray-900">
+          📈 アナリティクス
+        </h2>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <WeeklyTrendChart />
+          <ScoreDistributionChart />
+        </div>
+      </div>
+
+      {/* 活動カレンダー */}
+      <div>
+        <CalendarHeatmap />
+      </div>
 
       {/* 最近の失敗記録 */}
       <div>
