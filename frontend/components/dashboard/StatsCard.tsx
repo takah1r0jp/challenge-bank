@@ -54,7 +54,7 @@ export function StatsCard({ title, stats, icon, delay = 0 }: StatsCardProps) {
           <div className="mt-3">
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
               <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-600"
+                className="h-full rounded-full bg-linear-to-r from-blue-500 to-blue-600"
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.min((stats.failure_count / 100) * 100, 100)}%` }}
                 transition={{ duration: 1, delay: delay + 0.3, ease: "easeOut" }}
