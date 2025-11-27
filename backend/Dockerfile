@@ -23,8 +23,8 @@ RUN uv sync --frozen
 # アプリケーションコードをコピー（ボリュームマウントするが、初期ビルド用）
 COPY . .
 
-# ポート8000を公開
+# ポートを公開（Railwayが動的に割り当て）
 EXPOSE 8000
 
-# 開発サーバーを起動（ホットリロード有効）
-CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# 本番サーバーを起動（PORT環境変数を使用、デフォルト8000）
+CMD ["sh", "-c", "uv run uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
