@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material Design - Bottom Navigation</title>
+  <style>
+    :root {
+      /* Material Design 3 Color Tokens */
+      --md-sys-color-primary: #6750A4;
+      --md-sys-color-secondary-container: #E8DEF8;
+      --md-sys-color-on-secondary-container: #1D192B;
+      --md-sys-color-surface: #FFFBFE;
+      --md-sys-color-surface-container: #F3EDF7;
+      --md-sys-color-on-surface: #1C1B1F;
+      --md-sys-color-on-surface-variant: #49454F;
+      --md-sys-color-outline-variant: #CAC4D0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      padding-bottom: 100px; /* Space for bottom nav */
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 40px;
+      margin-bottom: 16px;
+    }
+
+    .page-content {
+      font-size: 16px;
+      line-height: 24px;
+      letter-spacing: 0.5px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    /* Bottom Navigation Bar */
+    .md-bottom-nav {
+      display: flex;
+      height: 80px;
+      background-color: var(--md-sys-color-surface-container);
+      border-top: 1px solid var(--md-sys-color-outline-variant);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .md-bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      color: var(--md-sys-color-on-surface-variant);
+      cursor: pointer;
+      position: relative;
+      min-width: 80px;
+      max-width: 168px;
+      padding: 12px 0;
+      transition: color 0.2s;
+    }
+
+    .md-bottom-nav-item:hover {
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .md-bottom-nav-item.active {
+      color: var(--md-sys-color-on-secondary-container);
+    }
+
+    /* Active Indicator (pill shape) */
+    .md-bottom-nav-item.active::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      width: 64px;
+      height: 32px;
+      background-color: var(--md-sys-color-secondary-container);
+      border-radius: 16px;
+      z-index: 0;
+    }
+
+    .md-bottom-nav-icon {
+      width: 24px;
+      height: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .md-bottom-nav-label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      line-height: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Badge (for notifications) */
+    .md-badge {
+      position: absolute;
+      top: 8px;
+      right: 50%;
+      transform: translateX(16px);
+      background-color: var(--md-sys-color-primary);
+      color: white;
+      font-size: 11px;
+      font-weight: 500;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      z-index: 2;
+    }
+
+    /* Hide content when inactive */
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Home Page -->
+    <div id="home" class="page active">
+      <h1 class="page-title">Home</h1>
+      <p class="page-content">
+        Welcome to the Material Design 3 bottom navigation example. The bottom navigation bar
+        provides quick access to top-level destinations in your app.
+      </p>
+      <p class="page-content" style="margin-top: 16px;">
+        Bottom navigation is recommended for 3-5 destinations. Each destination should have a
+        clear icon and short label.
+      </p>
+    </div>
+
+    <!-- Explore Page -->
+    <div id="explore" class="page">
+      <h1 class="page-title">Explore</h1>
+      <p class="page-content">
+        Discover new content and features. The explore section helps users find relevant
+        information and navigate to different parts of the application.
+      </p>
+    </div>
+
+    <!-- Notifications Page -->
+    <div id="notifications" class="page">
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-content">
+        You have 3 new notifications. Stay up to date with the latest updates and messages.
+      </p>
+      <p class="page-content" style="margin-top: 16px;">
+        Notice the badge on the navigation icon indicating unread notifications.
+      </p>
+    </div>
+
+    <!-- Profile Page -->
+    <div id="profile" class="page">
+      <h1 class="page-title">Profile</h1>
+      <p class="page-content">
+        Manage your account settings, preferences, and personal information here.
+      </p>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="md-bottom-nav" role="navigation">
+    <button
+      class="md-bottom-nav-item active"
+      data-page="home"
+      aria-label="Home"
+      onclick="navigateTo('home', this)"
+    >
+      <svg class="md-bottom-nav-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+      <span class="md-bottom-nav-label">Home</span>
+    </button>
+
+    <button
+      class="md-bottom-nav-item"
+      data-page="explore"
+      aria-label="Explore"
+      onclick="navigateTo('explore', this)"
+    >
+      <svg class="md-bottom-nav-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+      <span class="md-bottom-nav-label">Explore</span>
+    </button>
+
+    <button
+      class="md-bottom-nav-item"
+      data-page="notifications"
+      aria-label="Notifications"
+      onclick="navigateTo('notifications', this)"
+    >
+      <div style="position: relative;">
+        <svg class="md-bottom-nav-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+        </svg>
+        <span class="md-badge">3</span>
+      </div>
+      <span class="md-bottom-nav-label">Notifications</span>
+    </button>
+
+    <button
+      class="md-bottom-nav-item"
+      data-page="profile"
+      aria-label="Profile"
+      onclick="navigateTo('profile', this)"
+    >
+      <svg class="md-bottom-nav-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+      <span class="md-bottom-nav-label">Profile</span>
+    </button>
+  </nav>
+
+  <script>
+    function navigateTo(pageId, buttonElement) {
+      // Hide all pages
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+
+      // Remove active state from all nav items
+      document.querySelectorAll('.md-bottom-nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Show selected page
+      document.getElementById(pageId).classList.add('active');
+
+      // Add active state to clicked nav item
+      buttonElement.classList.add('active');
+
+      // Clear badge on notifications page
+      if (pageId === 'notifications') {
+        const badge = document.querySelector('.md-badge');
+        if (badge) {
+          badge.style.display = 'none';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

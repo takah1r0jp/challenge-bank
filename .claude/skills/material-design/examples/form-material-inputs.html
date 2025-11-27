@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material Design - Form Example</title>
+  <style>
+    :root {
+      /* Material Design 3 Color Tokens */
+      --md-sys-color-primary: #6750A4;
+      --md-sys-color-on-primary: #FFFFFF;
+      --md-sys-color-surface: #FFFBFE;
+      --md-sys-color-surface-container-highest: #E6E0E9;
+      --md-sys-color-on-surface: #1C1B1F;
+      --md-sys-color-on-surface-variant: #49454F;
+      --md-sys-color-error: #B3261E;
+      --md-sys-color-on-error: #FFFFFF;
+      --md-sys-color-outline: #79747E;
+
+      /* Shape */
+      --md-shape-corner-extra-small: 4px;
+      --md-shape-corner-full: 9999px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      padding: 40px 20px;
+    }
+
+    .form-container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .form-title {
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 40px;
+      margin-bottom: 32px;
+    }
+
+    /* Text Field (Filled) */
+    .md-text-field-container {
+      margin-bottom: 24px;
+    }
+
+    .md-text-field-filled {
+      position: relative;
+      background-color: var(--md-sys-color-surface-container-highest);
+      border-radius: var(--md-shape-corner-extra-small) var(--md-shape-corner-extra-small) 0 0;
+      padding: 8px 16px;
+      transition: background-color 0.2s;
+    }
+
+    .md-text-field-filled:focus-within {
+      background-color: var(--md-sys-color-surface-container-highest);
+    }
+
+    .md-text-field-label {
+      display: block;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.4px;
+      margin-bottom: 4px;
+      transition: color 0.2s;
+    }
+
+    .md-text-field-filled:focus-within .md-text-field-label {
+      color: var(--md-sys-color-primary);
+    }
+
+    .md-text-field-input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: var(--md-sys-color-on-surface);
+      font-size: 16px;
+      line-height: 24px;
+      letter-spacing: 0.5px;
+      outline: none;
+      padding: 0;
+      padding-bottom: 8px;
+    }
+
+    .md-text-field-input::placeholder {
+      color: var(--md-sys-color-on-surface-variant);
+      opacity: 0.6;
+    }
+
+    .md-text-field-active-indicator {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background-color: var(--md-sys-color-on-surface-variant);
+      transition: height 0.2s, background-color 0.2s;
+    }
+
+    .md-text-field-filled:focus-within .md-text-field-active-indicator {
+      height: 2px;
+      background-color: var(--md-sys-color-primary);
+    }
+
+    .md-text-field-container.error .md-text-field-active-indicator {
+      background-color: var(--md-sys-color-error);
+    }
+
+    .md-text-field-supporting-text {
+      display: block;
+      margin-top: 4px;
+      padding: 0 16px;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+      line-height: 16px;
+      letter-spacing: 0.4px;
+    }
+
+    .md-text-field-container.error .md-text-field-supporting-text {
+      color: var(--md-sys-color-error);
+    }
+
+    /* Text Field (Outlined) */
+    .md-text-field-outlined {
+      position: relative;
+      border: 1px solid var(--md-sys-color-outline);
+      border-radius: var(--md-shape-corner-extra-small);
+      padding: 16px;
+      background-color: transparent;
+      transition: border 0.2s, padding 0.2s;
+    }
+
+    .md-text-field-outlined:focus-within {
+      border-width: 2px;
+      border-color: var(--md-sys-color-primary);
+      padding: 15px;
+    }
+
+    .md-text-field-outlined .md-text-field-label {
+      position: absolute;
+      top: -8px;
+      left: 12px;
+      background-color: var(--md-sys-color-surface);
+      padding: 0 4px;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 12px;
+    }
+
+    .md-text-field-outlined:focus-within .md-text-field-label {
+      color: var(--md-sys-color-primary);
+    }
+
+    .md-text-field-outlined .md-text-field-input {
+      padding-bottom: 0;
+    }
+
+    /* Checkbox */
+    .md-checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      cursor: pointer;
+    }
+
+    .md-checkbox {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .md-checkbox input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    .md-checkbox-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 18px;
+      width: 18px;
+      border: 2px solid var(--md-sys-color-on-surface-variant);
+      border-radius: 2px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .md-checkbox input:checked ~ .md-checkbox-box {
+      background-color: var(--md-sys-color-primary);
+      border-color: var(--md-sys-color-primary);
+    }
+
+    .md-checkbox-checkmark {
+      position: absolute;
+      display: none;
+      left: 6px;
+      top: 2px;
+      width: 5px;
+      height: 10px;
+      border: solid var(--md-sys-color-on-primary);
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .md-checkbox input:checked ~ .md-checkbox-box .md-checkbox-checkmark {
+      display: block;
+    }
+
+    .md-checkbox-label {
+      font-size: 14px;
+      line-height: 20px;
+      letter-spacing: 0.25px;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    /* Button (Filled) */
+    .md-button-filled {
+      background-color: var(--md-sys-color-primary);
+      border: none;
+      border-radius: var(--md-shape-corner-full);
+      padding: 10px 24px;
+      min-height: 40px;
+      color: var(--md-sys-color-on-primary);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      position: relative;
+      cursor: pointer;
+      transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .md-button-filled:hover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-color: var(--md-sys-color-on-primary);
+      opacity: 0.08;
+      border-radius: inherit;
+    }
+
+    .md-button-filled:active {
+      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3),
+                  0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    }
+
+    .md-button-filled:disabled {
+      background-color: rgba(28, 27, 31, 0.12);
+      color: rgba(28, 27, 31, 0.38);
+      cursor: not-allowed;
+    }
+
+    /* Button (Text) */
+    .md-button-text {
+      background-color: transparent;
+      border: none;
+      border-radius: var(--md-shape-corner-full);
+      padding: 10px 12px;
+      min-height: 40px;
+      color: var(--md-sys-color-primary);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      cursor: pointer;
+      position: relative;
+      margin-right: 8px;
+    }
+
+    .md-button-text:hover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-color: var(--md-sys-color-primary);
+      opacity: 0.08;
+      border-radius: inherit;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1 class="form-title">Sign Up</h1>
+
+    <form>
+      <!-- Filled Text Field -->
+      <div class="md-text-field-container">
+        <div class="md-text-field-filled">
+          <label class="md-text-field-label" for="name">Full Name</label>
+          <input
+            type="text"
+            id="name"
+            class="md-text-field-input"
+            placeholder="Enter your full name"
+            required
+          >
+          <div class="md-text-field-active-indicator"></div>
+        </div>
+      </div>
+
+      <!-- Filled Text Field with Helper Text -->
+      <div class="md-text-field-container">
+        <div class="md-text-field-filled">
+          <label class="md-text-field-label" for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            class="md-text-field-input"
+            placeholder="you@example.com"
+            aria-describedby="email-helper"
+            required
+          >
+          <div class="md-text-field-active-indicator"></div>
+        </div>
+        <span id="email-helper" class="md-text-field-supporting-text">
+          We'll never share your email with anyone else.
+        </span>
+      </div>
+
+      <!-- Outlined Text Field -->
+      <div class="md-text-field-container">
+        <div class="md-text-field-outlined">
+          <label class="md-text-field-label" for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            class="md-text-field-input"
+            placeholder="Enter password"
+            required
+          >
+        </div>
+      </div>
+
+      <!-- Error State Example -->
+      <div class="md-text-field-container error">
+        <div class="md-text-field-filled">
+          <label class="md-text-field-label" for="confirm-password">Confirm Password</label>
+          <input
+            type="password"
+            id="confirm-password"
+            class="md-text-field-input"
+            placeholder="Confirm your password"
+            aria-describedby="confirm-password-error"
+            aria-invalid="true"
+          >
+          <div class="md-text-field-active-indicator"></div>
+        </div>
+        <span id="confirm-password-error" class="md-text-field-supporting-text">
+          Passwords do not match
+        </span>
+      </div>
+
+      <!-- Checkbox -->
+      <label class="md-checkbox-container">
+        <div class="md-checkbox">
+          <input type="checkbox" required>
+          <div class="md-checkbox-box">
+            <div class="md-checkbox-checkmark"></div>
+          </div>
+        </div>
+        <span class="md-checkbox-label">
+          I agree to the Terms of Service and Privacy Policy
+        </span>
+      </label>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="md-button-text">Cancel</button>
+        <button type="submit" class="md-button-filled">Sign Up</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

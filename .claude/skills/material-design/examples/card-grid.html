@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material Design - Card Grid</title>
+  <style>
+    :root {
+      /* Material Design 3 Color Tokens */
+      --md-sys-color-primary: #6750A4;
+      --md-sys-color-on-primary: #FFFFFF;
+      --md-sys-color-surface: #FFFBFE;
+      --md-sys-color-surface-container-low: #F7F2FA;
+      --md-sys-color-on-surface: #1C1B1F;
+      --md-sys-color-on-surface-variant: #49454F;
+      --md-sys-color-outline-variant: #CAC4D0;
+
+      /* Shape */
+      --md-shape-corner-medium: 12px;
+      --md-shape-corner-full: 9999px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 40px;
+      margin-bottom: 24px;
+    }
+
+    /* Responsive Card Grid */
+    .card-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+
+    /* Material Card (Elevated) */
+    .md-card {
+      background-color: var(--md-sys-color-surface-container-low);
+      border-radius: var(--md-shape-corner-medium);
+      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3),
+                  0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .md-card:hover {
+      box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3),
+                  0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Card Media (Image) */
+    .md-card-media {
+      width: 100%;
+      height: 200px;
+      background-color: var(--md-sys-color-outline-variant);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 14px;
+    }
+
+    .md-card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Card Content */
+    .md-card-content {
+      padding: 16px;
+      flex: 1;
+    }
+
+    .md-card-title {
+      font-size: 22px;
+      line-height: 28px;
+      font-weight: 400;
+      margin-bottom: 8px;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .md-card-subtitle {
+      font-size: 14px;
+      line-height: 20px;
+      letter-spacing: 0.1px;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface-variant);
+      margin-bottom: 16px;
+    }
+
+    .md-card-supporting-text {
+      font-size: 14px;
+      line-height: 20px;
+      letter-spacing: 0.25px;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    /* Card Actions */
+    .md-card-actions {
+      display: flex;
+      gap: 8px;
+      padding: 8px 16px 16px 16px;
+      justify-content: flex-end;
+    }
+
+    /* Button (Text) */
+    .md-button-text {
+      background-color: transparent;
+      border: none;
+      border-radius: var(--md-shape-corner-full);
+      padding: 10px 12px;
+      min-height: 40px;
+      color: var(--md-sys-color-primary);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .md-button-text:hover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-color: var(--md-sys-color-primary);
+      opacity: 0.08;
+      border-radius: inherit;
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 599px) {
+      /* Compact: Single column on mobile */
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 600px) and (max-width: 839px) {
+      /* Medium: 2 columns on tablet */
+      .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 840px) {
+      /* Expanded: 3+ columns on desktop */
+      .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+    }
+
+    /* Empty State Placeholder */
+    .placeholder-image {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #E6E0E9 0%, #CAC4D0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 48px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="page-title">Responsive Card Grid</h1>
+
+    <div class="card-grid">
+      <!-- Card 1 -->
+      <div class="md-card">
+        <div class="md-card-media">
+          <div class="placeholder-image">📷</div>
+        </div>
+        <div class="md-card-content">
+          <h3 class="md-card-title">Material Design 3</h3>
+          <p class="md-card-subtitle">Design System</p>
+          <p class="md-card-supporting-text">
+            Material You brings personalized, adaptive design to Android and beyond.
+          </p>
+        </div>
+        <div class="md-card-actions">
+          <button class="md-button-text">Share</button>
+          <button class="md-button-text">Learn More</button>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="md-card">
+        <div class="md-card-media">
+          <div class="placeholder-image">🎨</div>
+        </div>
+        <div class="md-card-content">
+          <h3 class="md-card-title">Dynamic Color</h3>
+          <p class="md-card-subtitle">Color System</p>
+          <p class="md-card-supporting-text">
+            Generate harmonious color schemes from a single source color using HCT.
+          </p>
+        </div>
+        <div class="md-card-actions">
+          <button class="md-button-text">Share</button>
+          <button class="md-button-text">Explore</button>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="md-card">
+        <div class="md-card-media">
+          <div class="placeholder-image">📱</div>
+        </div>
+        <div class="md-card-content">
+          <h3 class="md-card-title">Adaptive Layouts</h3>
+          <p class="md-card-subtitle">Responsive Design</p>
+          <p class="md-card-supporting-text">
+            Build interfaces that adapt seamlessly across phones, tablets, and desktops.
+          </p>
+        </div>
+        <div class="md-card-actions">
+          <button class="md-button-text">Share</button>
+          <button class="md-button-text">View</button>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="md-card">
+        <div class="md-card-media">
+          <div class="placeholder-image">✨</div>
+        </div>
+        <div class="md-card-content">
+          <h3 class="md-card-title">Components</h3>
+          <p class="md-card-subtitle">Building Blocks</p>
+          <p class="md-card-supporting-text">
+            Use pre-built, accessible components that follow Material Design guidelines.
+          </p>
+        </div>
+        <div class="md-card-actions">
+          <button class="md-button-text">Share</button>
+          <button class="md-button-text">Browse</button>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="md-card">
+        <div class="md-card-media">
+          <div class="placeholder-image">🌙</div>
+        </div>
+        <div class="md-card-content">
+          <h3 class="md-card-title">Dark Theme</h3>
+          <p class="md-card-subtitle">Theming</p>
+          <p class="md-card-supporting-text">
+            Automatically support dark mode with semantic color roles and surface tints.
+          </p>
+        </div>
+        <div class="md-card-actions">
+          <button class="md-button-text">Share</button>
+          <button class="md-button-text">Try</button>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="md-card">
+        <div class="md-card-media">
+          <div class="placeholder-image">♿</div>
+        </div>
+        <div class="md-card-content">
+          <h3 class="md-card-title">Accessibility</h3>
+          <p class="md-card-subtitle">Inclusive Design</p>
+          <p class="md-card-supporting-text">
+            Built-in accessibility features ensure your app works for everyone.
+          </p>
+        </div>
+        <div class="md-card-actions">
+          <button class="md-button-text">Share</button>
+          <button class="md-button-text">Read</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
