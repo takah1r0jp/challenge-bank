@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
@@ -29,10 +30,15 @@ from schemas import (
 
 app = FastAPI(title="Failure Bank")
 
-# CORS設定
+# CORS設定（環境変数から許可オリジンを取得）
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000"  # デフォルトは開発環境のみ
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.jsのデフォルトポート
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],  # すべてのHTTPメソッドを許可
     allow_headers=["*"],  # すべてのヘッダーを許可
