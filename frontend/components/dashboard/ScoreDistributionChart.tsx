@@ -13,6 +13,7 @@ interface ScoreDistribution {
   score: number;
   count: number;
   percentage: number;
+  [key: string]: number; // Recharts互換のためのインデックスシグネチャ
 }
 
 // Material Design 3のカラーパレット（トーナルカラー）
