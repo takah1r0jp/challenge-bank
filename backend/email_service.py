@@ -185,8 +185,12 @@ def send_notification_email(user: User, stats: dict[str, Any]) -> bool:
 
         return True
 
-    except Exception:
-        # ロギングは今は行わずFalseを返す（テストでは例外を投げない）
+    except Exception as e:
+        # エラー内容をログに記録して、デバッグを容易にする
+        print(f"❌ Email send failed for {user.email}: {type(e).__name__}: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
         return False
 
 
