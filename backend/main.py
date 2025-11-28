@@ -12,13 +12,13 @@ from auth import create_access_token, get_current_user, get_password_hash, verif
 
 # 必要なモジュール
 from database import get_db
-from models import Failure, User
+from models import Challenge, User
 from schemas import (
     CalendarResponse,
+    ChallengeCreate,
+    ChallengeResponse,
+    ChallengeUpdate,
     DayStats,
-    FailureCreate,
-    FailureResponse,
-    FailureUpdate,
     PeriodStats,
     StatsSummaryResponse,
     SuccessResponse,
@@ -28,7 +28,7 @@ from schemas import (
     UserWithToken,
 )
 
-app = FastAPI(title="Failure Bank")
+app = FastAPI(title="Challenge Bank")
 
 # CORS設定（環境変数から許可オリジンを取得）
 ALLOWED_ORIGINS = os.getenv(
@@ -48,7 +48,7 @@ app.add_middleware(
 # ヘルスチェック
 @app.get("/")
 def root():
-    return {"message": "Failure Bank API is running."}
+    return {"message": "Challenge Bank API is running."}
 
 
 @app.exception_handler(HTTPException)
@@ -215,178 +215,178 @@ def logout_user(current_user: User = Depends(get_current_user)):
     }
 
 
-# ============ 失敗記録エンドポイント ============
+# ============ 挑戦記録エンドポイント ============
 
 
-# 失敗記録を作成
-@app.post("/failures", status_code=status.HTTP_201_CREATED, response_model=SuccessResponse)
-def create_failure(
-    failure_data: FailureCreate,
+# 挑戦記録を作成
+@app.post("/challenges", status_code=status.HTTP_201_CREATED, response_model=SuccessResponse)
+def create_challenge(
+    challenge_data: ChallengeCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """新しい失敗記録を作成するエンドポイント"""
+    """新しい挑戦記録を作成するエンドポイント"""
 
-    # 新しい失敗記録を作成
-    new_failure = Failure(
+    # 新しい挑戦記録を作成
+    new_challenge = Challenge(
         user_id=current_user.id,
-        content=failure_data.content,
-        score=failure_data.score,
+        content=challenge_data.content,
+        score=challenge_data.score,
     )
 
-    db.add(new_failure)
+    db.add(new_challenge)
     db.commit()
-    db.refresh(new_failure)
+    db.refresh(new_challenge)
 
     # レスポンスを返す
-    failure_response = FailureResponse.model_validate(new_failure)
+    challenge_response = ChallengeResponse.model_validate(new_challenge)
 
     return {
         "success": True,
-        "data": failure_response.model_dump(),
-        "message": "Failure record created successfully.",
+        "data": challenge_response.model_dump(),
+        "message": "Challenge record created successfully.",
     }
 
 
-# 失敗記録一覧を取得
-@app.get("/failures", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
-def get_failures(
+# 挑戦記録一覧を取得
+@app.get("/challenges", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+def get_challenges(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     limit: int = 20,
     offset: int = 0,
 ):
-    """認証済みユーザーの失敗記録一覧を取得するエンドポイント"""
+    """認証済みユーザーの挑戦記録一覧を取得するエンドポイント"""
 
-    # 自分の失敗記録のみを取得（他のユーザーの記録は見えない）
+    # 自分の挑戦記録のみを取得（他のユーザーの記録は見えない）
     # 新しい順（作成日時の降順）でソート
-    failures = (
-        db.query(Failure)
-        .filter(Failure.user_id == current_user.id)
-        .order_by(Failure.created_at.desc())
+    challenges = (
+        db.query(Challenge)
+        .filter(Challenge.user_id == current_user.id)
+        .order_by(Challenge.created_at.desc())
         .offset(offset)
         .limit(limit)
         .all()
     )
 
     # レスポンスを返す
-    failures_response = [
-        FailureResponse.model_validate(failure).model_dump() for failure in failures
+    challenges_response = [
+        ChallengeResponse.model_validate(challenge).model_dump() for challenge in challenges
     ]
 
     return {
         "success": True,
-        "data": failures_response,
-        "message": "Failure records retrieved successfully.",
+        "data": challenges_response,
+        "message": "Challenge records retrieved successfully.",
     }
 
 
-# 失敗記録の詳細を取得
-@app.get("/failures/{failure_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
-def get_failure_by_id(
-    failure_id: UUID,
+# 挑戦記録の詳細を取得
+@app.get("/challenges/{challenge_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+def get_challenge_by_id(
+    challenge_id: UUID,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """認証済みユーザーの特定の失敗記録を取得するエンドポイント"""
+    """認証済みユーザーの特定の挑戦記録を取得するエンドポイント"""
 
-    # 自分の失敗記録のみ取得（他のユーザーの記録は404）
-    failure = (
-        db.query(Failure)
-        .filter(Failure.id == failure_id, Failure.user_id == current_user.id)
+    # 自分の挑戦記録のみ取得（他のユーザーの記録は404）
+    challenge = (
+        db.query(Challenge)
+        .filter(Challenge.id == challenge_id, Challenge.user_id == current_user.id)
         .first()
     )
 
-    if not failure:
+    if not challenge:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Failure record not found.",
+            detail="Challenge record not found.",
         )
 
     # レスポンスを返す
-    failure_response = FailureResponse.model_validate(failure)
+    challenge_response = ChallengeResponse.model_validate(challenge)
 
     return {
         "success": True,
-        "data": failure_response.model_dump(),
-        "message": "Failure record retrieved successfully.",
+        "data": challenge_response.model_dump(),
+        "message": "Challenge record retrieved successfully.",
     }
 
 
-# 失敗記録を更新
-@app.put("/failures/{failure_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
-def update_failure(
-    failure_id: UUID,
-    failure_data: FailureUpdate,
+# 挑戦記録を更新
+@app.put("/challenges/{challenge_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+def update_challenge(
+    challenge_id: UUID,
+    challenge_data: ChallengeUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """認証済みユーザーの特定の失敗記録を更新するエンドポイント"""
+    """認証済みユーザーの特定の挑戦記録を更新するエンドポイント"""
 
-    # 自分の失敗記録のみ取得（他のユーザーの記録は404）
-    failure = (
-        db.query(Failure)
-        .filter(Failure.id == failure_id, Failure.user_id == current_user.id)
+    # 自分の挑戦記録のみ取得（他のユーザーの記録は404）
+    challenge = (
+        db.query(Challenge)
+        .filter(Challenge.id == challenge_id, Challenge.user_id == current_user.id)
         .first()
     )
 
-    if not failure:
+    if not challenge:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Failure record not found.",
+            detail="Challenge record not found.",
         )
 
     # 更新データを適用（Noneでないフィールドのみ更新）
-    if failure_data.content is not None:
-        failure.content = failure_data.content
-    if failure_data.score is not None:
-        failure.score = failure_data.score
+    if challenge_data.content is not None:
+        challenge.content = challenge_data.content
+    if challenge_data.score is not None:
+        challenge.score = challenge_data.score
 
     db.commit()
-    db.refresh(failure)
+    db.refresh(challenge)
 
     # レスポンスを返す
-    failure_response = FailureResponse.model_validate(failure)
+    challenge_response = ChallengeResponse.model_validate(challenge)
 
     return {
         "success": True,
-        "data": failure_response.model_dump(),
-        "message": "Failure record updated successfully.",
+        "data": challenge_response.model_dump(),
+        "message": "Challenge record updated successfully.",
     }
 
 
-# 失敗記録を削除
+# 挑戦記録を削除
 @app.delete(
-    "/failures/{failure_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse
+    "/challenges/{challenge_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse
 )
-def delete_failure(
-    failure_id: UUID,
+def delete_challenge(
+    challenge_id: UUID,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """認証済みユーザーの特定の失敗記録を削除するエンドポイント"""
+    """認証済みユーザーの特定の挑戦記録を削除するエンドポイント"""
 
-    # 自分の失敗記録のみ取得（他のユーザーの記録は404）
-    failure = (
-        db.query(Failure)
-        .filter(Failure.id == failure_id, Failure.user_id == current_user.id)
+    # 自分の挑戦記録のみ取得（他のユーザーの記録は404）
+    challenge = (
+        db.query(Challenge)
+        .filter(Challenge.id == challenge_id, Challenge.user_id == current_user.id)
         .first()
     )
 
-    if not failure:
+    if not challenge:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Failure record not found.",
+            detail="Challenge record not found.",
         )
 
     # 削除実行
-    db.delete(failure)
+    db.delete(challenge)
     db.commit()
 
     return {
         "success": True,
         "data": None,
-        "message": "Failure record deleted successfully.",
+        "message": "Challenge record deleted successfully.",
     }
 
 
@@ -418,32 +418,32 @@ def get_stats_summary(
     week_start_utc = week_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
     month_start_utc = month_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
 
-    # 自分の失敗記録を取得
-    all_failures = db.query(Failure).filter(Failure.user_id == current_user.id).all()
+    # 自分の挑戦記録を取得
+    all_challenges = db.query(Challenge).filter(Challenge.user_id == current_user.id).all()
 
-    # 今週の失敗記録（UTCで比較）
-    this_week_failures = [f for f in all_failures if f.created_at >= week_start_utc]
+    # 今週の挑戦記録（UTCで比較）
+    this_week_challenges = [f for f in all_challenges if f.created_at >= week_start_utc]
 
-    # 今月の失敗記録（UTCで比較）
-    this_month_failures = [f for f in all_failures if f.created_at >= month_start_utc]
+    # 今月の挑戦記録（UTCで比較）
+    this_month_challenges = [f for f in all_challenges if f.created_at >= month_start_utc]
 
     # ヘルパー関数: 期間別の統計を計算
-    def calculate_period_stats(failures_list):
-        if not failures_list:
-            return PeriodStats(failure_count=0, total_score=0, average_score=0.0)
+    def calculate_period_stats(challenges_list):
+        if not challenges_list:
+            return PeriodStats(challenge_count=0, total_score=0, average_score=0.0)
 
-        failure_count = len(failures_list)
-        total_score = sum(f.score for f in failures_list)
-        average_score = total_score / failure_count if failure_count > 0 else 0.0
+        challenge_count = len(challenges_list)
+        total_score = sum(f.score for f in challenges_list)
+        average_score = total_score / challenge_count if challenge_count > 0 else 0.0
 
         return PeriodStats(
-            failure_count=failure_count, total_score=total_score, average_score=average_score
+            challenge_count=challenge_count, total_score=total_score, average_score=average_score
         )
 
     # 各期間の統計を計算
-    all_time_stats = calculate_period_stats(all_failures)
-    this_week_stats = calculate_period_stats(this_week_failures)
-    this_month_stats = calculate_period_stats(this_month_failures)
+    all_time_stats = calculate_period_stats(all_challenges)
+    this_week_stats = calculate_period_stats(this_week_challenges)
+    this_month_stats = calculate_period_stats(this_month_challenges)
 
     stats_response = StatsSummaryResponse(
         all_time=all_time_stats, this_week=this_week_stats, this_month=this_month_stats
@@ -489,13 +489,13 @@ def get_calendar(
     month_start_utc = month_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
     month_end_utc = month_end_jst.astimezone(timezone.utc).replace(tzinfo=None)
 
-    # 指定月の失敗記録を取得
-    failures = (
-        db.query(Failure)
+    # 指定月の挑戦記録を取得
+    challenges = (
+        db.query(Challenge)
         .filter(
-            Failure.user_id == current_user.id,
-            Failure.created_at >= month_start_utc,
-            Failure.created_at < month_end_utc,
+            Challenge.user_id == current_user.id,
+            Challenge.created_at >= month_start_utc,
+            Challenge.created_at < month_end_utc,
         )
         .all()
     )
@@ -505,23 +505,23 @@ def get_calendar(
 
     daily_stats = defaultdict(list)
 
-    for failure in failures:
+    for challenge in challenges:
         # UTC時刻をJSTに変換して日付を取得
-        created_at_jst = failure.created_at.replace(tzinfo=timezone.utc).astimezone(jst)
+        created_at_jst = challenge.created_at.replace(tzinfo=timezone.utc).astimezone(jst)
         date_str = created_at_jst.strftime("%Y-%m-%d")
-        daily_stats[date_str].append(failure)
+        daily_stats[date_str].append(challenge)
 
     # 日別統計を計算
     days_list = []
-    for date_str, failures_on_day in sorted(daily_stats.items()):
-        failure_count = len(failures_on_day)
-        total_score = sum(f.score for f in failures_on_day)
-        average_score = total_score / failure_count if failure_count > 0 else 0.0
+    for date_str, challenges_on_day in sorted(daily_stats.items()):
+        challenge_count = len(challenges_on_day)
+        total_score = sum(f.score for f in challenges_on_day)
+        average_score = total_score / challenge_count if challenge_count > 0 else 0.0
 
         days_list.append(
             DayStats(
                 date=date_str,
-                failure_count=failure_count,
+                challenge_count=challenge_count,
                 total_score=total_score,
                 average_score=average_score,
             )

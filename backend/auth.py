@@ -52,7 +52,7 @@ def get_current_user(
     """トークンから現在のユーザーを取得"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="認証に失敗しました",
+        detail="認証に挑戦しました",
         headers={"WWW-Authenticate": "Bearer"},
     )
 

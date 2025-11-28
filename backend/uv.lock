@@ -347,7 +347,7 @@ wheels = [
 ]
 
 [[package]]
-name = "failure-bank-backend"
+name = "challenge-bank-backend"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

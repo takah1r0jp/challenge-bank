@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { apiClient, getErrorMessage } from "@/lib/api/client";
-import { ApiResponse, Failure } from "@/lib/types";
+import { ApiResponse, Challenge } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSkeleton } from "./ChartSkeleton";
 import { PieChartIcon } from "lucide-react";
@@ -21,7 +21,7 @@ const COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
 
 /**
  * スコア分布チャート
- * 失敗記録のスコア（1-5点）の分布を円グラフで可視化
+ * 挑戦記録のスコア（1-5点）の分布を円グラフで可視化
  * Material Design 3: トーナルカラー、レスポンシブデザイン
  */
 export function ScoreDistributionChart() {
@@ -33,12 +33,12 @@ export function ScoreDistributionChart() {
     async function fetchData() {
       try {
         setIsLoading(true);
-        // 最新100件の失敗記録を取得
-        const response = await apiClient.get<ApiResponse<Failure[]>>(
-          "/failures?limit=100"
+        // 最新100件の挑戦記録を取得
+        const response = await apiClient.get<ApiResponse<Challenge[]>>(
+          "/challenges?limit=100"
         );
 
-        const failures = response.data.data || [];
+        const challenges = response.data.data || [];
 
         // スコア別にカウント
         const scoreCounts = new Map<number, number>();
@@ -46,13 +46,13 @@ export function ScoreDistributionChart() {
           scoreCounts.set(i, 0);
         }
 
-        failures.forEach((failure) => {
-          const score = failure.score;
+        challenges.forEach((challenge) => {
+          const score = challenge.score;
           scoreCounts.set(score, (scoreCounts.get(score) || 0) + 1);
         });
 
         // 合計数を計算
-        const total = failures.length;
+        const total = challenges.length;
 
         // データ整形
         const distribution: ScoreDistribution[] = [];
@@ -75,7 +75,7 @@ export function ScoreDistributionChart() {
         setData(distribution.filter((d) => d.count > 0)); // カウントが0のスコアは除外
         setMostCommonScore(maxCount > 0 ? maxScore : null);
       } catch (error) {
-        console.error("Failed to fetch failures:", getErrorMessage(error));
+        console.error("Failed to fetch challenges:", getErrorMessage(error));
       } finally {
         setIsLoading(false);
       }

@@ -35,35 +35,35 @@ export interface RegisterCredentials extends AuthCredentials {
   confirmPassword: string;
 }
 
-// ========== Failure関連の型（MVP版） ==========
+// ========== Challenge関連の型（MVP版） ==========
 
 /**
- * Failure型（MVP版：contentとscoreのみ）
- * バックエンドのFailureモデルに対応
+ * Challenge型（MVP版：contentとscoreのみ）
+ * バックエンドのChallengeモデルに対応
  */
-export interface Failure {
+export interface Challenge {
   id: string;
   user_id: string;
-  content: string; // 失敗内容（MVP版では1つのフィールドに統合）
+  content: string; // 挑戦内容（MVP版では1つのフィールドに統合）
   score: number; // 1-5のスコア（挑戦度や学びの大きさ）
   created_at: string;
 }
 
 /**
- * Failure作成用型（MVP版）
- * POST /failures のリクエストボディ
+ * Challenge作成用型（MVP版）
+ * POST /challenges のリクエストボディ
  */
-export interface FailureCreate {
+export interface ChallengeCreate {
   content: string;
   score: number; // 1-5
 }
 
 /**
- * Failure更新用型（MVP版）
- * PUT /failures/{id} のリクエストボディ
+ * Challenge更新用型（MVP版）
+ * PUT /challenges/{id} のリクエストボディ
  * すべてのフィールドがオプション（部分更新可能）
  */
-export interface FailureUpdate {
+export interface ChallengeUpdate {
   content?: string;
   score?: number; // 1-5
 }
@@ -114,10 +114,10 @@ export interface ApiError {
 
 /**
  * 期間別統計
- * 失敗記録の数、合計スコア、平均スコアを含む
+ * 挑戦記録の数、合計スコア、平均スコアを含む
  */
 export interface PeriodStats {
-  failure_count: number;
+  challenge_count: number;
   total_score: number;
   average_score: number;
 }
@@ -135,11 +135,11 @@ export interface StatsSummary {
 
 /**
  * カレンダー日別データ
- * 特定の日の失敗記録の統計
+ * 特定の日の挑戦記録の統計
  */
 export interface DayStats {
   date: string; // "YYYY-MM-DD" 形式
-  failure_count: number;
+  challenge_count: number;
   total_score: number;
   average_score: number;
 }
@@ -177,11 +177,11 @@ export interface AsyncData<T> {
 
 // ========== Phase 2以降で拡張予定 ==========
 /*
-export interface FailureExtended {
+export interface ChallengeExtended {
   id: string;
   user_id: string;
   challenge_content: string;
-  failure_content: string;
+  challenge_content: string;
   next_action: string;
   challenge_level: 1 | 2 | 3;
   novelty_level: 1 | 2 | 3;

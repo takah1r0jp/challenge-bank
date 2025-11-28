@@ -6,7 +6,7 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 # PostgreSQLのデータベースURL（環境変数から取得）
 SQLALCHEMY_DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql+psycopg2://ttaka:postgres@localhost/failure_bank"
+    "DATABASE_URL", "postgresql+psycopg2://ttaka:postgres@localhost/challenge_bank"
 )
 
 engine = create_engine(

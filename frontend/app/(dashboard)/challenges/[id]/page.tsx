@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient, getErrorMessage } from "@/lib/api/client";
-import { Failure, ApiResponse } from "@/lib/types";
+import { Challenge, ApiResponse } from "@/lib/types";
 import { toast } from "react-hot-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,36 +30,36 @@ function renderStars(score: number): string {
   return filledStars + emptyStars;
 }
 
-export default function FailureDetailPage() {
+export default function ChallengeDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const [failure, setFailure] = useState<Failure | null>(null);
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // データ取得
   useEffect(() => {
-    const fetchFailure = async () => {
+    const fetchChallenge = async () => {
       try {
         setIsLoading(true);
-        const response = await apiClient.get<ApiResponse<Failure>>(
-          `/failures/${id}`
+        const response = await apiClient.get<ApiResponse<Challenge>>(
+          `/challenges/${id}`
         );
-        setFailure(response.data.data);
+        setChallenge(response.data.data);
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         toast.error(errorMessage);
-        // データ取得失敗時は一覧ページへリダイレクト
-        router.push("/failures");
+        // データ取得挑戦時は一覧ページへリダイレクト
+        router.push("/challenges");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchFailure();
+    fetchChallenge();
   }, [id, router]);
 
   // 削除処理
@@ -70,11 +70,11 @@ export default function FailureDetailPage() {
   const confirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await apiClient.delete(`/failures/${id}`);
-      toast.success("失敗記録を削除しました");
+      await apiClient.delete(`/challenges/${id}`);
+      toast.success("挑戦記録を削除しました");
       setShowDeleteDialog(false);
       // 削除成功時は一覧ページへリダイレクト
-      router.push("/failures");
+      router.push("/challenges");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
@@ -97,19 +97,19 @@ export default function FailureDetailPage() {
   }
 
   // データが取得できなかった場合（エラー時は既にリダイレクト済み）
-  if (!failure) {
+  if (!challenge) {
     return null;
   }
 
   // 相対時間（「3時間前」など）
-  const relativeTime = formatDistanceToNow(new Date(failure.created_at), {
+  const relativeTime = formatDistanceToNow(new Date(challenge.created_at), {
     addSuffix: true,
     locale: ja,
   });
 
   // 絶対時間（「2024年1月15日 14:30」）
   const absoluteTime = format(
-    new Date(failure.created_at),
+    new Date(challenge.created_at),
     "yyyy年MM月dd日 HH:mm",
     { locale: ja }
   );
@@ -119,14 +119,14 @@ export default function FailureDetailPage() {
       <div className="max-w-2xl mx-auto">
         {/* アクションボタン（上部） */}
         <div className="mb-6 flex items-center justify-between">
-          <Link href="/failures">
+          <Link href="/challenges">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               一覧へ戻る
             </Button>
           </Link>
           <div className="flex gap-2">
-            <Link href={`/failures/${id}/edit`}>
+            <Link href={`/challenges/${id}/edit`}>
               <Button className="bg-blue-600 hover:bg-blue-700">
                 <Pencil className="mr-2 h-4 w-4" />
                 編集
@@ -145,20 +145,20 @@ export default function FailureDetailPage() {
             {/* スコア表示 */}
             <div className="flex items-center gap-3">
               <span className="text-3xl text-yellow-500">
-                {renderStars(failure.score)}
+                {renderStars(challenge.score)}
               </span>
               <span className="text-xl font-semibold text-gray-700">
-                {failure.score}点
+                {challenge.score}点
               </span>
             </div>
 
             {/* 区切り線 */}
             <div className="border-t border-gray-200"></div>
 
-            {/* 失敗内容（全文） */}
+            {/* 挑戦内容（全文） */}
             <div>
               <p className="text-base text-gray-800 leading-relaxed whitespace-pre-wrap">
-                {failure.content}
+                {challenge.content}
               </p>
             </div>
 
@@ -180,7 +180,7 @@ export default function FailureDetailPage() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>この失敗記録を削除しますか？</DialogTitle>
+            <DialogTitle>この挑戦記録を削除しますか？</DialogTitle>
             <DialogDescription>
               この操作は取り消せません。
             </DialogDescription>

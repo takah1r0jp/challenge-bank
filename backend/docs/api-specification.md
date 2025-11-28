@@ -1,8 +1,8 @@
-# Failure Bank API 仕様書
+# Challenge Bank API 仕様書
 
 ## 概要
 
-Failure Bank APIは、日々の失敗を記録・管理し、統計情報を提供するためのRESTful APIです。
+Challenge Bank APIは、日々の挑戦を記録・管理し、統計情報を提供するためのRESTful APIです。
 
 **ベースURL**: `http://localhost:8000`
 
@@ -199,10 +199,10 @@ Authorization: Bearer {access_token}
 
 ---
 
-## 📝 失敗記録エンドポイント
+## 📝 挑戦記録エンドポイント
 
-### POST /failures
-新しい失敗記録を作成します。
+### POST /challenges
+新しい挑戦記録を作成します。
 
 **認証**: 必要
 
@@ -225,7 +225,7 @@ Authorization: Bearer {access_token}
     "score": 3,
     "created_at": "2024-01-01T00:00:00"
   },
-  "message": "Failure record created successfully."
+  "message": "Challenge record created successfully."
 }
 ```
 
@@ -235,8 +235,8 @@ Authorization: Bearer {access_token}
 
 ---
 
-### GET /failures
-ユーザーの失敗記録一覧を取得します。
+### GET /challenges
+ユーザーの挑戦記録一覧を取得します。
 
 **認証**: 必要
 
@@ -266,7 +266,7 @@ Authorization: Bearer {access_token}
       "created_at": "2024-01-02T00:00:00"
     }
   ],
-  "message": "Failure records retrieved successfully."
+  "message": "Challenge records retrieved successfully."
 }
 ```
 
@@ -275,13 +275,13 @@ Authorization: Bearer {access_token}
 
 ---
 
-### GET /failures/{id}
-特定の失敗記録の詳細を取得します。
+### GET /challenges/{id}
+特定の挑戦記録の詳細を取得します。
 
 **認証**: 必要
 
 **パスパラメータ**:
-- `id`: 失敗記録のID
+- `id`: 挑戦記録のID
 
 **レスポンス** (200 OK):
 ```json
@@ -294,23 +294,23 @@ Authorization: Bearer {access_token}
     "score": 3,
     "created_at": "2024-01-01T00:00:00"
   },
-  "message": "Failure record retrieved successfully."
+  "message": "Challenge record retrieved successfully."
 }
 ```
 
 **エラー**:
 - `401 UNAUTHORIZED`: 認証エラー
-- `404 NOT_FOUND`: 指定されたIDの失敗記録が存在しない、または他のユーザーの記録
+- `404 NOT_FOUND`: 指定されたIDの挑戦記録が存在しない、または他のユーザーの記録
 
 ---
 
-### PATCH /failures/{id}
-失敗記録を更新します。
+### PATCH /challenges/{id}
+挑戦記録を更新します。
 
 **認証**: 必要
 
 **パスパラメータ**:
-- `id`: 失敗記録のID
+- `id`: 挑戦記録のID
 
 **リクエストボディ** (すべてオプション):
 ```json
@@ -331,44 +331,44 @@ Authorization: Bearer {access_token}
     "score": 2,
     "created_at": "2024-01-01T00:00:00"
   },
-  "message": "Failure record updated successfully."
+  "message": "Challenge record updated successfully."
 }
 ```
 
 **エラー**:
 - `401 UNAUTHORIZED`: 認証エラー
-- `404 NOT_FOUND`: 指定されたIDの失敗記録が存在しない、または他のユーザーの記録
+- `404 NOT_FOUND`: 指定されたIDの挑戦記録が存在しない、または他のユーザーの記録
 - `422 VALIDATION_ERROR`: バリデーションエラー
 
 ---
 
-### DELETE /failures/{id}
-失敗記録を削除します。
+### DELETE /challenges/{id}
+挑戦記録を削除します。
 
 **認証**: 必要
 
 **パスパラメータ**:
-- `id`: 失敗記録のID
+- `id`: 挑戦記録のID
 
 **レスポンス** (200 OK):
 ```json
 {
   "success": true,
   "data": null,
-  "message": "Failure record deleted successfully."
+  "message": "Challenge record deleted successfully."
 }
 ```
 
 **エラー**:
 - `401 UNAUTHORIZED`: 認証エラー
-- `404 NOT_FOUND`: 指定されたIDの失敗記録が存在しない、または他のユーザーの記録
+- `404 NOT_FOUND`: 指定されたIDの挑戦記録が存在しない、または他のユーザーの記録
 
 ---
 
 ## 📊 統計エンドポイント
 
 ### GET /stats/summary
-失敗記録の統計サマリーを取得します。
+挑戦記録の統計サマリーを取得します。
 
 **認証**: 必要
 
@@ -380,7 +380,7 @@ Authorization: Bearer {access_token}
 {
   "success": true,
   "data": {
-    "total_failures": 150,
+    "total_challenges": 150,
     "average_score": 3.2,
     "total_days": 45,
     "current_streak": 7,
@@ -440,7 +440,7 @@ Authorization: Bearer {access_token}
 ---
 
 ### GET /stats/trends
-時系列での失敗記録のトレンドを取得します。
+時系列での挑戦記録のトレンドを取得します。
 
 **認証**: 必要
 
@@ -557,7 +557,7 @@ Authorization: Bearer {access_token}
 }
 ```
 
-### Failure
+### Challenge
 ```typescript
 {
   id: UUID
@@ -579,11 +579,11 @@ Authorization: Bearer {access_token}
 | /auth/logout | POST | 📝 未実装 |
 | /auth/me | GET | ✅ 実装済み |
 | /auth/me | PATCH | 📝 未実装 |
-| /failures | POST | 📝 未実装 |
-| /failures | GET | 📝 未実装 |
-| /failures/{id} | GET | 📝 未実装 |
-| /failures/{id} | PATCH | 📝 未実装 |
-| /failures/{id} | DELETE | 📝 未実装 |
+| /challenges | POST | 📝 未実装 |
+| /challenges | GET | 📝 未実装 |
+| /challenges/{id} | GET | 📝 未実装 |
+| /challenges/{id} | PATCH | 📝 未実装 |
+| /challenges/{id} | DELETE | 📝 未実装 |
 | /stats/summary | GET | 📝 未実装 |
 | /stats/calendar | GET | 📝 未実装 |
 | /stats/trends | GET | 📝 未実装 |

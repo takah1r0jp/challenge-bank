@@ -1,1 +1,1 @@
-# Failure Bank - 失敗を貯金するアプリ
+# Challenge Bank - 挑戦を貯金するアプリ
