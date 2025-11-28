@@ -160,7 +160,7 @@ def send_notification_email(user: User, stats: dict[str, Any]) -> bool:
 
             # HTMLとテキストの両方を送信（マルチパート）
             kwargs = {
-                "from_email": from_email,
+                "from_": from_email,
                 "to": [user.email],
                 "subject": subject,
             }
@@ -179,7 +179,7 @@ def send_notification_email(user: User, stats: dict[str, Any]) -> bool:
             emails = emails_cls()
 
             kwargs = {
-                "from_email": from_email,
+                "from_": from_email,
                 "to": [user.email],
                 "subject": subject,
             }
