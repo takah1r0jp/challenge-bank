@@ -94,11 +94,14 @@ def send_notification_email(user: User, stats: dict[str, Any]) -> bool:
     実際の送信はResend等のクライアントに委ねる。成功すればTrue、失敗または例外でFalseを返す。
     この関数はテストのために簡易なモック可能な形で実装している。
     """
+    print(f"🔔 Starting email notification for {user.email}")
     try:
         # インポートを実行時に行うことでテスト時にsys.modules経由で差し替え可能にする
         import importlib
 
+        print(f"📦 Importing resend module...")
         resend = importlib.import_module("resend")
+        print(f"✅ Resend module imported successfully")
 
         app_url = os.getenv("APP_URL", "https://example.com")
         from_email = os.getenv("FROM_EMAIL", "noreply@example.com")
@@ -137,11 +140,17 @@ def send_notification_email(user: User, stats: dict[str, Any]) -> bool:
         # ResendのクライアントAPIは環境によって異なるため柔軟に対応
         # 1) モジュールが Resend クラスを提供する場合
         if hasattr(resend, "Resend"):
+            print(f"📧 Attempting to send email to {user.email} using resend.Resend class")
             api_key = os.getenv("RESEND_API_KEY")
+            if not api_key:
+                print(f"❌ RESEND_API_KEY not found in environment variables")
+                return False
+            print(f"✅ RESEND_API_KEY found: {api_key[:8]}...")
             client = resend.Resend(api_key)
             emails_client = getattr(client, "emails", None) or getattr(client, "Emails", None)
             if emails_client is None:
                 # モジュール実装が想定と異なる場合は失敗
+                print(f"❌ emails_client is None - resend client structure unexpected")
                 return False
             # instance may be attribute or class
             if callable(emails_client):
@@ -161,9 +170,11 @@ def send_notification_email(user: User, stats: dict[str, Any]) -> bool:
                 kwargs["text"] = text_body
 
             emails.send(**kwargs)
+            print(f"✅ Email sent successfully to {user.email}")
 
         # 2) モジュール自体が Emails 属性を持っている場合
         elif hasattr(resend, "Emails"):
+            print(f"📧 Attempting to send email to {user.email} using resend.Emails class")
             emails_cls = resend.Emails
             emails = emails_cls()
 
@@ -178,9 +189,12 @@ def send_notification_email(user: User, stats: dict[str, Any]) -> bool:
                 kwargs["text"] = text_body
 
             emails.send(**kwargs)
+            print(f"✅ Email sent successfully to {user.email}")
 
         else:
             # 未対応のクライアント
+            print(f"❌ Unsupported resend client - no Resend class or Emails attribute found")
+            print(f"   Available attributes: {dir(resend)}")
             return False
 
         return True
