@@ -32,7 +32,7 @@ export default function RegisterPage() {
 
   /**
    * フォーム送信ハンドラー
-   * ユーザー登録処理を実行し、成功/失敗をトースト通知
+   * ユーザー登録処理を実行し、成功/挑戦をトースト通知
    */
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);

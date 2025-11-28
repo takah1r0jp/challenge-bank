@@ -33,7 +33,7 @@ export function Header() {
           <div className="flex items-center gap-8">
             {/* ロゴ */}
             <Link href="/" className="text-xl font-bold text-gray-900">
-              Failure Bank
+              Challenge Bank
             </Link>
 
             {/* ナビゲーション */}
@@ -49,12 +49,12 @@ export function Header() {
                 ダッシュボード
               </Link>
               <Link
-                href="/failures"
+                href="/challenges"
                 className={`text-sm font-medium transition-colors hover:text-blue-600 ${
-                  isActive("/failures") ? "text-blue-600" : "text-gray-600"
+                  isActive("/challenges") ? "text-blue-600" : "text-gray-600"
                 }`}
               >
-                失敗一覧
+                挑戦一覧
               </Link>
             </nav>
           </div>

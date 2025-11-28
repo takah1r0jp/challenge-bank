@@ -16,7 +16,7 @@ interface StatsCardProps {
 
 /**
  * 統計カードコンポーネント
- * 失敗記録数、合計スコア、平均スコアを表示
+ * 挑戦記録数、合計スコア、平均スコアを表示
  * Material Design 3: エレベーション、マイクロインタラクション
  */
 export function StatsCard({ title, stats, icon, delay = 0 }: StatsCardProps) {
@@ -33,8 +33,8 @@ export function StatsCard({ title, stats, icon, delay = 0 }: StatsCardProps) {
           {icon && <div className="text-blue-500">{icon}</div>}
         </CardHeader>
         <CardContent>
-          {/* 失敗記録数（大きく表示、Material Design 3: Emphasis） */}
-          <div className="text-3xl font-bold text-gray-900">{stats.failure_count}回</div>
+          {/* 挑戦記録数（大きく表示、Material Design 3: Emphasis） */}
+          <div className="text-3xl font-bold text-gray-900">{stats.challenge_count}回</div>
 
           {/* 合計スコアと平均スコア */}
           <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
@@ -56,7 +56,7 @@ export function StatsCard({ title, stats, icon, delay = 0 }: StatsCardProps) {
               <motion.div
                 className="h-full rounded-full bg-linear-to-r from-blue-500 to-blue-600"
                 initial={{ width: 0 }}
-                animate={{ width: `${Math.min((stats.failure_count / 100) * 100, 100)}%` }}
+                animate={{ width: `${Math.min((stats.challenge_count / 100) * 100, 100)}%` }}
                 transition={{ duration: 1, delay: delay + 0.3, ease: "easeOut" }}
               />
             </div>

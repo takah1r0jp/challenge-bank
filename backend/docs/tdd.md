@@ -6,7 +6,7 @@ TDD開発の流れ
 cd backend
 uv sync
 
-# テストが実行できることを確認（まだ全て失敗します）
+# テストが実行できることを確認（まだ全て挑戦します）
 pytest tests/test_auth.py -v
 
 1. 認証ユーティリティの作成（backend/auth_utils.py）
@@ -41,7 +41,7 @@ class TokenData(BaseModel):
 
 from fastapi import FastAPI
 
-app = FastAPI(title="Failure Bank API")
+app = FastAPI(title="Challenge Bank API")
 
 # auth.pyからルーターをインポートして追加
 from auth import router as auth_router
@@ -53,7 +53,7 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
 ステップ1: POST /auth/register（ユーザー登録）
 
-1. テストを実行 → 失敗を確認
+1. テストを実行 → 挑戦を確認
 pytest tests/test_auth.py::TestUserRegistration::test_register_success -v
 2. 実装する内容:
 - APIRouterを作成
@@ -66,7 +66,7 @@ pytest tests/test_auth.py::TestUserRegistration -v
 
 ステップ2: POST /auth/login（ログイン）
 
-1. テストを実行 → 失敗を確認
+1. テストを実行 → 挑戦を確認
 pytest tests/test_auth.py::TestUserLogin::test_login_success -v
 2. 実装する内容:
 - /login エンドポイントを作成
@@ -79,7 +79,7 @@ pytest tests/test_auth.py::TestUserLogin -v
 
 ステップ3: GET /auth/me（ユーザー情報取得）
 
-1. テストを実行 → 失敗を確認
+1. テストを実行 → 挑戦を確認
 pytest tests/test_auth.py::TestGetCurrentUser::test_get_me_success -v
 2. 実装する内容:
 - 認証依存関数を作成 get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db))
@@ -99,12 +99,12 @@ pytest tests/test_auth.py -v
 TDDのポイント
 
 1. Red → Green → Refactor のサイクルを守る
-- Red: テストを書いて失敗させる
+- Red: テストを書いて挑戦させる
 - Green: 最小限の実装でテストを通す
 - Refactor: コードを整理する
 2. 一度に1つのテストだけ実装する
 - 焦らず、1つずつクリアしていく
-3. テストが失敗する理由を確認する
+3. テストが挑戦する理由を確認する
 - エラーメッセージを読んで、何が必要か理解する
 
 実装時の参考情報
@@ -129,6 +129,6 @@ TDDのポイント
 4. backend/auth.py - 認証エンドポイント（register → login → me の順）
 
 まずは uv sync で依存関係をインストールしてから、pytest tests/test_auth.py -v
-でテストが失敗することを確認してスタートしてください！
+でテストが挑戦することを確認してスタートしてください！
 
 質問があればいつでもどうぞ。頑張ってください！

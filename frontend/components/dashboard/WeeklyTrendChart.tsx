@@ -21,13 +21,13 @@ import { TrendingUp } from "lucide-react";
 
 interface ChartDataPoint {
   date: string;
-  failures: number;
+  challenges: number;
   displayDate: string;
 }
 
 /**
  * 週次トレンドチャート
- * 過去7-14日の失敗記録数の推移を視覚化
+ * 過去7-14日の挑戦記録数の推移を視覚化
  * Material Design 3: グラデーション、スムーズなアニメーション
  */
 export function WeeklyTrendChart() {
@@ -55,7 +55,7 @@ export function WeeklyTrendChart() {
 
           return {
             date: day.date,
-            failures: day.failure_count,
+            challenges: day.challenge_count,
             displayDate,
           };
         });
@@ -148,12 +148,12 @@ export function WeeklyTrendChart() {
                   fontWeight: 600,
                   marginBottom: "4px",
                 }}
-                formatter={(value: number) => [`${value}回`, "失敗記録"]}
+                formatter={(value: number) => [`${value}回`, "挑戦記録"]}
               />
 
               {/* グラデーション塗りつぶし（Material Design 3: tonal surface） */}
               <defs>
-                <linearGradient id="colorFailures" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="colorChallenges" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
                   <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
                 </linearGradient>
@@ -161,10 +161,10 @@ export function WeeklyTrendChart() {
 
               <Area
                 type="monotone"
-                dataKey="failures"
+                dataKey="challenges"
                 stroke="#3b82f6"
                 strokeWidth={2.5}
-                fill="url(#colorFailures)"
+                fill="url(#colorChallenges)"
                 animationDuration={1000}
                 animationEasing="ease-in-out"
               />

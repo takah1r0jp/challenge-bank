@@ -2,7 +2,7 @@
 
 > **作成日**: 2025-11-26
 > **ステータス**: 承認済み
-> **対象**: Failure Bank フロントエンド・バックエンド
+> **対象**: Challenge Bank フロントエンド・バックエンド
 
 ## 概要
 
@@ -12,14 +12,14 @@
 
 ### フロントエンド
 - Recharts 3.5.0 インストール済みだが未使用
-- 統計表示は数字のみ（failure_count, total_score, average_score）
+- 統計表示は数字のみ（challenge_count, total_score, average_score）
 - `/stats/calendar` APIは実装済みだが未活用
 - date-fns、react-day-picker 利用可能
 
 ### バックエンド
 - `GET /stats/summary` - 全期間/今週/今月の統計（実装済み）
 - `GET /stats/calendar` - 月別日次統計（実装済み）
-- `GET /failures` - 失敗記録一覧（実装済み）
+- `GET /challenges` - 挑戦記録一覧（実装済み）
 
 ## 推奨アプローチ：段階的実装（ユーザー選択に基づく）
 
@@ -40,14 +40,14 @@
 #### 実装内容
 
 1. **週次トレンドライングラフ**
-   - 過去7-14日の失敗記録数の推移を視覚化
+   - 過去7-14日の挑戦記録数の推移を視覚化
    - Recharts LineChart使用
    - データソース: `GET /stats/calendar`
 
 2. **スコア分布円グラフ**
    - 挑戦レベル（1-5点）の分布を可視化
    - Recharts PieChart使用
-   - データソース: `GET /failures?limit=100`
+   - データソース: `GET /challenges?limit=100`
 
 3. **カレンダーヒートマップ**
    - GitHub風の貢献カレンダー
@@ -102,7 +102,7 @@ Response:
   "data": {
     "current_streak": 7,
     "longest_streak": 21,
-    "last_failure_date": "2025-01-26"
+    "last_challenge_date": "2025-01-26"
   }
 }
 ```
@@ -189,9 +189,9 @@ Response:
   "data": {
     "unlocked": [
       {
-        "id": "first_failure",
+        "id": "first_challenge",
         "name": "はじめの一歩",
-        "description": "初めての失敗を記録",
+        "description": "初めての挑戦を記録",
         "icon": "🎯",
         "unlocked_at": "2024-01-01T10:00:00"
       }
@@ -231,7 +231,7 @@ class Goal(Base):
 class Achievement(Base):
     __tablename__ = "achievements"
 
-    id = Column(String, primary_key=True)  # "first_failure", "streak_7"
+    id = Column(String, primary_key=True)  # "first_challenge", "streak_7"
     name = Column(String, nullable=False)
     description = Column(Text, nullable=False)
     icon = Column(String, nullable=False)
@@ -281,7 +281,7 @@ class UserAchievement(Base):
 **実装コスト**: 111-148時間
 **必要な追加API**: OpenAI API統合、高度な統計分析
 
-- 失敗パターンのAI分析
+- 挑戦パターンのAI分析
 - パーソナライズされた改善提案
 - 予測分析（目標達成確率など）
 
@@ -290,7 +290,7 @@ class UserAchievement(Base):
 **実装コスト**: 228-296時間
 **必要な追加機能**: ソーシャル機能、プライバシー設定
 
-- 失敗の共有機能
+- 挑戦の共有機能
 - コミュニティランキング
 - 相互励まし機能
 
@@ -325,7 +325,7 @@ class UserAchievement(Base):
 
 **Day 3-4: ScoreDistributionChart**
 1. `components/dashboard/ScoreDistributionChart.tsx` 作成
-2. `/failures` APIから最新100件取得
+2. `/challenges` APIから最新100件取得
 3. スコア分布を計算（1-5点）
 4. Recharts PieChart実装
 5. 中央に最頻スコア表示
@@ -333,9 +333,9 @@ class UserAchievement(Base):
 **Day 5-6: CalendarHeatmap**
 1. `components/dashboard/CalendarHeatmap.tsx` 作成
 2. GitHub風レイアウト実装
-3. failure_countに基づく色の濃淡
+3. challenge_countに基づく色の濃淡
 4. ホバーで日別詳細表示
-5. クリックでその日の失敗一覧へ遷移
+5. クリックでその日の挑戦一覧へ遷移
 
 **Day 7: 統合とテスト**
 1. `app/(dashboard)/page.tsx` にチャート統合

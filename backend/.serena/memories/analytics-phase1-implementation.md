@@ -10,7 +10,7 @@
 
 ### 1. WeeklyTrendChart（週次トレンドチャート）
 - **ファイル**: `frontend/components/dashboard/WeeklyTrendChart.tsx`
-- **機能**: 過去14日間の失敗記録数の推移をエリアチャートで可視化
+- **機能**: 過去14日間の挑戦記録数の推移をエリアチャートで可視化
 - **使用API**: `GET /stats/calendar`
 - **技術**: Recharts AreaChart、グラデーション塗りつぶし
 - **アニメーション**: framer-motion（エントランスアニメーション）
@@ -18,7 +18,7 @@
 ### 2. ScoreDistributionChart（スコア分布チャート）
 - **ファイル**: `frontend/components/dashboard/ScoreDistributionChart.tsx`
 - **機能**: 最新100件のスコア（1-5点）分布を円グラフで表示
-- **使用API**: `GET /failures?limit=100`
+- **使用API**: `GET /challenges?limit=100`
 - **技術**: Recharts PieChart（ドーナツ型）
 - **カラー**: Material Design 3 トーナルカラーパレット
 
@@ -95,7 +95,7 @@
 既存のAPIエンドポイントを活用：
 - `GET /stats/summary`: 統計サマリー
 - `GET /stats/calendar`: 月別日次統計
-- `GET /failures`: 失敗記録一覧
+- `GET /challenges`: 挑戦記録一覧
 
 ## ドキュメント
 
@@ -120,7 +120,7 @@
 - **変更**: 9ファイル、1150行追加、25行削除
 
 ### Pull Request
-- **URL**: https://github.com/takah1r0jp/failure-bank/pull/6
+- **URL**: https://github.com/takah1r0jp/challenge-bank/pull/6
 - **ステータス**: Open
 
 ## 次のステップ（Phase 1.5）
@@ -131,7 +131,7 @@
 
 #### バックエンド
 - 新規API: `GET /stats/streak`
-- レスポンス: `current_streak`, `longest_streak`, `last_failure_date`
+- レスポンス: `current_streak`, `longest_streak`, `last_challenge_date`
 - テスト: `backend/tests/test_stats.py`
 
 #### フロントエンド

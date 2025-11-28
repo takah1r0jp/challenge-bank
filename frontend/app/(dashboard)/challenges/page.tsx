@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
 import { apiClient, getErrorMessage } from "@/lib/api/client";
-import { Failure, ApiResponse } from "@/lib/types";
-import { FailureCard } from "@/components/dashboard/FailureCard";
+import { Challenge, ApiResponse } from "@/lib/types";
+import { ChallengeCard } from "@/components/dashboard/ChallengeCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,63 +20,63 @@ import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-export default function FailuresListPage() {
+export default function ChallengesListPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const [failures, setFailures] = useState<Failure[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deletingFailureId, setDeletingFailureId] = useState<string | null>(null);
+  const [deletingChallengeId, setDeletingChallengeId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // データ取得
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const fetchFailures = async () => {
+    const fetchChallenges = async () => {
       try {
         setIsLoading(true);
-        const response = await apiClient.get<ApiResponse<Failure[]>>(
-          "/failures?limit=50"
+        const response = await apiClient.get<ApiResponse<Challenge[]>>(
+          "/challenges?limit=50"
         );
-        setFailures(response.data.data);
+        setChallenges(response.data.data);
       } catch (error) {
-        console.error("Failed to fetch failures:", getErrorMessage(error));
-        toast.error("失敗記録の取得に失敗しました");
+        console.error("Failed to fetch challenges:", getErrorMessage(error));
+        toast.error("挑戦記録の取得に挑戦しました");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchFailures();
+    fetchChallenges();
   }, [isAuthenticated]);
 
   // 編集ボタンのハンドラ
   const handleEdit = (id: string) => {
     // 将来実装: 編集ページへ遷移
-    router.push(`/failures/${id}/edit`);
+    router.push(`/challenges/${id}/edit`);
   };
 
   // 削除ボタンのハンドラ
   const handleDelete = (id: string) => {
-    setDeletingFailureId(id);
+    setDeletingChallengeId(id);
     setDeleteDialogOpen(true);
   };
 
   // 削除確認
   const confirmDelete = async () => {
-    if (!deletingFailureId) return;
+    if (!deletingChallengeId) return;
 
     setIsDeleting(true);
     try {
-      await apiClient.delete(`/failures/${deletingFailureId}`);
+      await apiClient.delete(`/challenges/${deletingChallengeId}`);
 
       // 楽観的UI更新: リストから削除
-      setFailures((prev) => prev.filter((f) => f.id !== deletingFailureId));
+      setChallenges((prev) => prev.filter((f) => f.id !== deletingChallengeId));
 
-      toast.success("失敗記録を削除しました");
+      toast.success("挑戦記録を削除しました");
       setDeleteDialogOpen(false);
-      setDeletingFailureId(null);
+      setDeletingChallengeId(null);
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
@@ -88,7 +88,7 @@ export default function FailuresListPage() {
   // 削除キャンセル
   const cancelDelete = () => {
     setDeleteDialogOpen(false);
-    setDeletingFailureId(null);
+    setDeletingChallengeId(null);
   };
 
   // 認証チェック中
@@ -119,24 +119,24 @@ export default function FailuresListPage() {
       <div className="max-w-4xl mx-auto">
         {/* ヘッダー */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-800">失敗の記録</h1>
-          <Link href="/failures/new">
+          <h1 className="text-3xl font-bold text-gray-800">挑戦の記録</h1>
+          <Link href="/challenges/new">
             <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="mr-2 h-4 w-4" />
-              新しい失敗を記録
+              新しい挑戦を記録
             </Button>
           </Link>
         </div>
 
-        {/* 失敗記録一覧 */}
-        {failures.length === 0 ? (
+        {/* 挑戦記録一覧 */}
+        {challenges.length === 0 ? (
           <EmptyState />
         ) : (
           <div className="space-y-4">
-            {failures.map((failure) => (
-              <FailureCard
-                key={failure.id}
-                failure={failure}
+            {challenges.map((challenge) => (
+              <ChallengeCard
+                key={challenge.id}
+                challenge={challenge}
                 showActions
                 onEdit={handleEdit}
                 onDelete={handleDelete}
@@ -150,7 +150,7 @@ export default function FailuresListPage() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>この失敗記録を削除しますか？</DialogTitle>
+            <DialogTitle>この挑戦記録を削除しますか？</DialogTitle>
             <DialogDescription>
               この操作は取り消せません。
             </DialogDescription>

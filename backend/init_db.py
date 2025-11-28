@@ -7,4 +7,4 @@ Base.metadata.create_all(bind=engine)
 
 print("テーブルを作成しました:")
 print("- users")
-print("- failures")
+print("- challenges")

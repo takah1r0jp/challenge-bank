@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Failure Bank - 失敗を貯金するアプリ",
+  title: "Challenge Bank - 挑戦を貯金するアプリ",
   description: "挑戦を習慣化し、成長を可視化するアプリケーション",
 };
 

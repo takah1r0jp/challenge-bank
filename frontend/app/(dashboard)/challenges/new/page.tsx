@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { failureSchema } from "@/lib/utils/validators";
+import { challengeSchema } from "@/lib/utils/validators";
 import { apiClient, getErrorMessage } from "@/lib/api/client";
-import { Failure, ApiResponse } from "@/lib/types";
 import { toast } from "react-hot-toast";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,20 +21,15 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-type FailureFormData = {
+type ChallengeFormData = {
   content: string;
   score: number;
 };
 
-export default function EditFailurePage() {
-  const params = useParams();
+export default function NewChallengePage() {
   const router = useRouter();
-  const id = params.id as string;
-
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [failure, setFailure] = useState<Failure | null>(null);
 
   const {
     register,
@@ -43,8 +37,8 @@ export default function EditFailurePage() {
     watch,
     setValue,
     formState: { errors, isDirty },
-  } = useForm<FailureFormData>({
-    resolver: zodResolver(failureSchema),
+  } = useForm<ChallengeFormData>({
+    resolver: zodResolver(challengeSchema),
     defaultValues: {
       content: "",
       score: undefined,
@@ -54,40 +48,12 @@ export default function EditFailurePage() {
   const watchScore = watch("score");
   const watchContent = watch("content");
 
-  // データ取得
-  useEffect(() => {
-    const fetchFailure = async () => {
-      try {
-        setIsLoading(true);
-        const response = await apiClient.get<ApiResponse<Failure>>(
-          `/failures/${id}`
-        );
-        const failureData = response.data.data;
-        setFailure(failureData);
-
-        // フォームに初期値をセット（shouldDirty: false で「変更なし」扱い）
-        setValue("content", failureData.content, { shouldDirty: false });
-        setValue("score", failureData.score, { shouldDirty: false });
-      } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        toast.error(errorMessage);
-        // データ取得失敗時は一覧ページへリダイレクト
-        router.push("/failures");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchFailure();
-  }, [id, router, setValue]);
-
-  // 更新処理
-  const onSubmit = async (data: FailureFormData) => {
+  const onSubmit = async (data: ChallengeFormData) => {
     setIsSubmitting(true);
     try {
-      await apiClient.put(`/failures/${id}`, data);
-      toast.success("失敗記録を更新しました");
-      router.push("/failures");
+      await apiClient.post("/challenges", data);
+      toast.success(`+${data.score}点！また一歩成長しました`);
+      router.push("/");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
@@ -96,34 +62,19 @@ export default function EditFailurePage() {
     }
   };
 
-  // キャンセル処理
   const handleCancel = () => {
-    // 変更がある場合は確認ダイアログを表示
-    if (isDirty) {
+    // 入力内容がある場合は確認ダイアログを表示
+    if (isDirty && (watchContent || watchScore)) {
       setShowCancelDialog(true);
     } else {
-      router.push("/failures");
+      router.push("/");
     }
   };
 
   const confirmCancel = () => {
     setShowCancelDialog(false);
-    router.push("/failures");
+    router.push("/");
   };
-
-  // データ読み込み中
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-600">読み込み中...</p>
-      </div>
-    );
-  }
-
-  // データが取得できなかった場合（エラー時は既にリダイレクト済み）
-  if (!failure) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -131,19 +82,19 @@ export default function EditFailurePage() {
         <Card className="shadow-md">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-gray-800">
-              ✏️ 失敗記録を編集
+              📝 新しい挑戦を記録
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* 失敗内容 */}
+              {/* 挑戦内容 */}
               <div className="space-y-2">
                 <Label htmlFor="content" className="text-base font-medium">
-                  失敗内容 <span className="text-red-600">*</span>
+                  挑戦内容 <span className="text-red-600">*</span>
                 </Label>
                 <Textarea
                   id="content"
-                  placeholder="どんな挑戦をして、どんな失敗をしましたか？"
+                  placeholder="どんな挑戦をして、どんな挑戦をしましたか？"
                   rows={5}
                   className={cn(
                     "resize-none",
@@ -224,7 +175,7 @@ export default function EditFailurePage() {
                   disabled={isSubmitting}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
-                  {isSubmitting ? "更新中..." : "更新する"}
+                  {isSubmitting ? "記録中..." : "記録する"}
                 </Button>
               </div>
             </form>
@@ -236,9 +187,9 @@ export default function EditFailurePage() {
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>変更を破棄しますか？</DialogTitle>
+            <DialogTitle>入力内容を破棄しますか？</DialogTitle>
             <DialogDescription>
-              編集した内容は保存されません。本当に戻りますか？
+              入力した内容は保存されません。本当に戻りますか？
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -246,7 +197,7 @@ export default function EditFailurePage() {
               variant="outline"
               onClick={() => setShowCancelDialog(false)}
             >
-              編集を続ける
+              入力を続ける
             </Button>
             <Button
               variant="destructive"

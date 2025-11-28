@@ -36,14 +36,14 @@ export const loginSchema = z.object({
 export type LoginFormData = z.infer<typeof loginSchema>;
 
 /**
- * 失敗記録スキーマ（MVP版：contentとscoreのみ）
- * 失敗内容とスコアのバリデーション
+ * 挑戦記録スキーマ（MVP版：contentとscoreのみ）
+ * 挑戦内容とスコアのバリデーション
  */
-export const failureSchema = z.object({
+export const challengeSchema = z.object({
   content: z
     .string()
-    .min(1, "失敗内容を入力してください")
-    .max(1000, "失敗内容は1000文字以内で入力してください"),
+    .min(1, "挑戦内容を入力してください")
+    .max(1000, "挑戦内容は1000文字以内で入力してください"),
   score: z
     .number({
       message: "スコアを選択してください",
@@ -54,21 +54,21 @@ export const failureSchema = z.object({
 });
 
 /**
- * 失敗記録スキーマから型を推論
+ * 挑戦記録スキーマから型を推論
  */
-export type FailureFormData = z.infer<typeof failureSchema>;
+export type ChallengeFormData = z.infer<typeof challengeSchema>;
 
 // ========== Phase 2以降で拡張予定 ==========
 /*
-export const failureSchemaExtended = z.object({
+export const challengeSchemaExtended = z.object({
   challenge_content: z
     .string()
     .min(1, "挑戦内容を入力してください")
     .max(500, "挑戦内容は500文字以内で入力してください"),
-  failure_content: z
+  challenge_content: z
     .string()
-    .min(1, "失敗内容を入力してください")
-    .max(1000, "失敗内容は1000文字以内で入力してください"),
+    .min(1, "挑戦内容を入力してください")
+    .max(1000, "挑戦内容は1000文字以内で入力してください"),
   next_action: z
     .string()
     .min(1, "ネクストアクションを入力してください")

@@ -86,7 +86,7 @@ apiClient.interceptors.response.use(
  *
  * @example
  * try {
- *   await apiClient.post("/failures", data);
+ *   await apiClient.post("/challenges", data);
  * } catch (error) {
  *   const message = getErrorMessage(error);
  *   toast.error(message);

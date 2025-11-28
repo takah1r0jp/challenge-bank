@@ -59,25 +59,25 @@ class UserResponse(BaseModel):
     model_config = {"from_attributes": True}  # SQLAlchemyモデルから変換可能に
 
 
-# ======Failure関連=======
+# ======Challenge関連=======
 
 
-class FailureCreate(BaseModel):
-    """失敗記録作成時の入力"""
+class ChallengeCreate(BaseModel):
+    """挑戦記録作成時の入力"""
 
     content: str = Field(min_length=1, max_length=1000)
     score: int = Field(ge=1, le=5)  # スコアは1から5の範囲
 
 
-class FailureUpdate(BaseModel):
-    """失敗記録更新時の入力"""
+class ChallengeUpdate(BaseModel):
+    """挑戦記録更新時の入力"""
 
     content: str | None = Field(None, min_length=1, max_length=1000)
     score: int | None = Field(None, ge=1, le=5)
 
 
-class FailureResponse(BaseModel):
-    """失敗記録のレスポンス"""
+class ChallengeResponse(BaseModel):
+    """挑戦記録のレスポンス"""
 
     id: UUID
     user_id: UUID
@@ -91,18 +91,18 @@ class FailureResponse(BaseModel):
 # ========== 継承を使ったネストモデル ==========
 
 
-class UserWithFailures(UserResponse):
+class UserWithChallenges(UserResponse):
     """
-    UserResponseを継承して、failuresフィールドを追加
+    UserResponseを継承して、challengesフィールドを追加
     id, email, notification_time, created_atは自動的に継承される
     """
 
-    failures: list[FailureResponse]
+    challenges: list[ChallengeResponse]
 
 
-class FailureWithUser(FailureResponse):
+class ChallengeWithUser(ChallengeResponse):
     """
-    FailureResponseを継承して、userフィールドを追加
+    ChallengeResponseを継承して、userフィールドを追加
     id, user_id, content, score, created_atは自動的に継承される
     """
 
@@ -141,7 +141,7 @@ class ErrorResponse(BaseModel):
 class PeriodStats(BaseModel):
     """期間別の統計情報"""
 
-    failure_count: int
+    challenge_count: int
     total_score: int
     average_score: float
 
@@ -158,7 +158,7 @@ class DayStats(BaseModel):
     """日別の統計情報"""
 
     date: str  # YYYY-MM-DD形式
-    failure_count: int
+    challenge_count: int
     total_score: int
     average_score: float
 

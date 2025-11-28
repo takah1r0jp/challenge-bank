@@ -12,3 +12,5 @@ frontend/.next/
 # IDE
 .vscode/
 .DS_Store
+
+.env

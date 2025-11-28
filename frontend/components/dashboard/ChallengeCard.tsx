@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Failure } from "@/lib/types";
+import { Challenge } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Pencil, Trash2 } from "lucide-react";
 
 /**
- * 失敗記録カードのProps
+ * 挑戦記録カードのProps
  */
-interface FailureCardProps {
-  failure: Failure;
+interface ChallengeCardProps {
+  challenge: Challenge;
   showActions?: boolean; // 編集・削除ボタンを表示するかどうか
   onEdit?: (id: string) => void; // 編集ボタンのクリックハンドラ
   onDelete?: (id: string) => void; // 削除ボタンのクリックハンドラ
@@ -27,18 +27,18 @@ function renderStars(score: number): string {
 }
 
 /**
- * 失敗記録カードコンポーネント
- * 失敗内容（省略形）、スコア、相対時間を表示
+ * 挑戦記録カードコンポーネント
+ * 挑戦内容（省略形）、スコア、相対時間を表示
  */
-export function FailureCard({ failure, showActions = false, onEdit, onDelete }: FailureCardProps) {
-  // 失敗内容を最初の100文字に省略
+export function ChallengeCard({ challenge, showActions = false, onEdit, onDelete }: ChallengeCardProps) {
+  // 挑戦内容を最初の100文字に省略
   const truncatedContent =
-    failure.content.length > 100
-      ? failure.content.slice(0, 100) + "..."
-      : failure.content;
+    challenge.content.length > 100
+      ? challenge.content.slice(0, 100) + "..."
+      : challenge.content;
 
   // 相対時間（"3時間前"など）
-  const relativeTime = formatDistanceToNow(new Date(failure.created_at), {
+  const relativeTime = formatDistanceToNow(new Date(challenge.created_at), {
     addSuffix: true,
     locale: ja,
   });
@@ -48,8 +48,8 @@ export function FailureCard({ failure, showActions = false, onEdit, onDelete }: 
     return (
       <Card className="transition-shadow hover:shadow-md">
         <CardContent className="p-4">
-          {/* 失敗内容（省略形） */}
-          <Link href={`/failures/${failure.id}`} className="block hover:text-blue-600">
+          {/* 挑戦内容（省略形） */}
+          <Link href={`/challenges/${challenge.id}`} className="block hover:text-blue-600">
             <p className="text-sm text-gray-700">{truncatedContent}</p>
           </Link>
 
@@ -58,7 +58,7 @@ export function FailureCard({ failure, showActions = false, onEdit, onDelete }: 
             <div className="flex items-center gap-3">
               {/* スコア（星で表示） */}
               <span className="text-lg text-yellow-500">
-                {renderStars(failure.score)}
+                {renderStars(challenge.score)}
               </span>
 
               {/* 相対時間 */}
@@ -72,7 +72,7 @@ export function FailureCard({ failure, showActions = false, onEdit, onDelete }: 
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEdit?.(failure.id);
+                  onEdit?.(challenge.id);
                 }}
                 className="h-8 w-8 p-0"
                 aria-label="編集"
@@ -84,7 +84,7 @@ export function FailureCard({ failure, showActions = false, onEdit, onDelete }: 
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete?.(failure.id);
+                  onDelete?.(challenge.id);
                 }}
                 className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                 aria-label="削除"
@@ -100,17 +100,17 @@ export function FailureCard({ failure, showActions = false, onEdit, onDelete }: 
 
   // アクションボタンがない場合は、従来通りカード全体をリンクにする
   return (
-    <Link href={`/failures/${failure.id}`}>
+    <Link href={`/challenges/${challenge.id}`}>
       <Card className="cursor-pointer transition-shadow hover:shadow-md">
         <CardContent className="p-4">
-          {/* 失敗内容（省略形） */}
+          {/* 挑戦内容（省略形） */}
           <p className="text-sm text-gray-700">{truncatedContent}</p>
 
           {/* スコアと時間 */}
           <div className="mt-3 flex items-center justify-between">
             {/* スコア（星で表示） */}
             <span className="text-lg text-yellow-500">
-              {renderStars(failure.score)}
+              {renderStars(challenge.score)}
             </span>
 
             {/* 相対時間 */}

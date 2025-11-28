@@ -2,11 +2,11 @@ services:
   # PostgreSQL データベース
   db:
     image: postgres:16-alpine
-    container_name: failure-bank-db
+    container_name: challenge-bank-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: failure_bank
+      POSTGRES_DB: challenge_bank
     ports:
       - "5432:5432"
     volumes:
@@ -22,7 +22,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: failure-bank-backend
+    container_name: challenge-bank-backend
     ports:
       - "8000:8000"
     volumes:
@@ -39,7 +39,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: failure-bank-frontend
+    container_name: challenge-bank-frontend
     ports:
       - "3000:3000"
     volumes:

@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
 import { apiClient, getErrorMessage } from "@/lib/api/client";
-import { ApiResponse, StatsSummary, Failure } from "@/lib/types";
+import { ApiResponse, StatsSummary, Challenge } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { StatsCard } from "@/components/dashboard/StatsCard";
-import { FailureCard } from "@/components/dashboard/FailureCard";
+import { ChallengeCard } from "@/components/dashboard/ChallengeCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { WeeklyTrendChart } from "@/components/dashboard/WeeklyTrendChart";
 import { ScoreDistributionChart } from "@/components/dashboard/ScoreDistributionChart";
@@ -17,9 +17,9 @@ import { Plus, Clock, Calendar as CalendarIcon, TrendingUp } from "lucide-react"
 
 /**
  * ダッシュボードページ
- * - 新しい失敗を記録するボタン
+ * - 新しい挑戦を記録するボタン
  * - 統計サマリー（全期間、今週、今月）
- * - 最近の失敗記録（直近5件）
+ * - 最近の挑戦記録（直近5件）
  */
 export default function DashboardPage() {
   const router = useRouter();
@@ -27,8 +27,8 @@ export default function DashboardPage() {
 
   // 統計データ
   const [stats, setStats] = useState<StatsSummary | null>(null);
-  // 最近の失敗記録
-  const [recentFailures, setRecentFailures] = useState<Failure[]>([]);
+  // 最近の挑戦記録
+  const [recentChallenges, setRecentChallenges] = useState<Challenge[]>([]);
   // ローディング状態
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,7 +44,7 @@ export default function DashboardPage() {
 
   /**
    * データ取得
-   * 統計サマリーと最近の失敗記録を並列で取得
+   * 統計サマリーと最近の挑戦記録を並列で取得
    */
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -54,13 +54,13 @@ export default function DashboardPage() {
         setIsLoading(true);
 
         // 並列でAPIを呼び出し
-        const [statsResponse, failuresResponse] = await Promise.all([
+        const [statsResponse, challengesResponse] = await Promise.all([
           apiClient.get<ApiResponse<StatsSummary>>("/stats/summary"),
-          apiClient.get<ApiResponse<Failure[]>>("/failures?limit=5"),
+          apiClient.get<ApiResponse<Challenge[]>>("/challenges?limit=5"),
         ]);
 
         setStats(statsResponse.data.data);
-        setRecentFailures(failuresResponse.data.data || []);
+        setRecentChallenges(challengesResponse.data.data || []);
       } catch (error) {
         console.error("データ取得エラー:", getErrorMessage(error));
       } finally {
@@ -99,10 +99,10 @@ export default function DashboardPage() {
             あなたの挑戦の記録を確認しましょう
           </p>
         </div>
-        <Link href="/failures/new">
+        <Link href="/challenges/new">
           <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
             <Plus className="mr-2 h-5 w-5" />
-            新しい失敗を記録
+            新しい挑戦を記録
           </Button>
         </Link>
       </div>
@@ -152,26 +152,26 @@ export default function DashboardPage() {
         <CalendarHeatmap />
       </div>
 
-      {/* 最近の失敗記録 */}
+      {/* 最近の挑戦記録 */}
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900">
-            📝 最近の失敗記録
+            📝 最近の挑戦記録
           </h2>
-          {recentFailures && recentFailures.length > 0 && (
-            <Link href="/failures" className="text-sm text-blue-600 hover:underline">
+          {recentChallenges && recentChallenges.length > 0 && (
+            <Link href="/challenges" className="text-sm text-blue-600 hover:underline">
               すべて見る →
             </Link>
           )}
         </div>
 
-        {/* 失敗記録がない場合 */}
-        {!recentFailures || recentFailures.length === 0 ? (
+        {/* 挑戦記録がない場合 */}
+        {!recentChallenges || recentChallenges.length === 0 ? (
           <EmptyState />
         ) : (
           <div className="space-y-3">
-            {recentFailures.map((failure) => (
-              <FailureCard key={failure.id} failure={failure} />
+            {recentChallenges.map((challenge) => (
+              <ChallengeCard key={challenge.id} challenge={challenge} />
             ))}
           </div>
         )}

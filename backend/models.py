@@ -26,32 +26,32 @@ class User(Base):
     )
 
     # リレーション
-    failures: Mapped[list["Failure"]] = relationship(
-        "Failure", back_populates="user", cascade="all, delete-orphan", lazy="selectin"
+    challenges: Mapped[list["Challenge"]] = relationship(
+        "Challenge", back_populates="user", cascade="all, delete-orphan", lazy="selectin"
     )
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email})>"
 
 
-class Failure(Base):
-    __tablename__ = "failures"
+class Challenge(Base):
+    __tablename__ = "challenges"
 
     id: Mapped[str] = mapped_column(Uuid, primary_key=True, default=generate_uuid)
     user_id: Mapped[str] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )  # Userテーブルの外部キー
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    score: Mapped[int] = mapped_column(Integer, nullable=False)  # 失敗の質を数値化したもの
+    score: Mapped[int] = mapped_column(Integer, nullable=False)  # 挑戦の質を数値化したもの
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(), nullable=False
     )
 
     # リレーション（型ヒント付き）
     user: Mapped["User"] = relationship(
-        back_populates="failures",
-        lazy="joined",  # Failureを取得時にUserも一緒に取得
+        back_populates="challenges",
+        lazy="joined",  # Challengeを取得時にUserも一緒に取得
     )
 
     def __repr__(self) -> str:
-        return f"<Failure(id={self.id}, user_id={self.user_id}, score={self.score})>"
+        return f"<Challenge(id={self.id}, user_id={self.user_id}, score={self.score})>"

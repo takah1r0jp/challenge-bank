@@ -1,10 +1,10 @@
-# Failure Bank - フロントエンド開発要件書
+# Challenge Bank - フロントエンド開発要件書
 
 **挑戦を習慣化し、成長を可視化するWebアプリケーション - フロントエンド仕様**
 
 ## プロジェクト概要
 
-Failure Bankは、ユーザーが日々の失敗を記録・可視化し、挑戦を習慣化するためのWebアプリケーションです。このドキュメントでは、Next.js (App Router) を使用したフロントエンドの開発要件を定義します。
+Challenge Bankは、ユーザーが日々の挑戦を記録・可視化し、挑戦を習慣化するためのWebアプリケーションです。このドキュメントでは、Next.js (App Router) を使用したフロントエンドの開発要件を定義します。
 
 ## 技術スタック
 
@@ -45,14 +45,14 @@ frontend/
 │   ├── (dashboard)/
 │   │   ├── layout.tsx              # 認証済みレイアウト
 │   │   ├── page.tsx                # ダッシュボード
-│   │   ├── failures/
-│   │   │   ├── page.tsx            # 失敗一覧
+│   │   ├── challenges/
+│   │   │   ├── page.tsx            # 挑戦一覧
 │   │   │   ├── new/
-│   │   │   │   └── page.tsx        # 失敗記録作成
+│   │   │   │   └── page.tsx        # 挑戦記録作成
 │   │   │   └── [id]/
-│   │   │       ├── page.tsx        # 失敗詳細
+│   │   │       ├── page.tsx        # 挑戦詳細
 │   │   │       └── edit/
-│   │   │           └── page.tsx    # 失敗編集
+│   │   │           └── page.tsx    # 挑戦編集
 │   │   ├── statistics/
 │   │   │   └── page.tsx            # 統計・可視化
 │   │   └── settings/
@@ -64,10 +64,10 @@ frontend/
 │   ├── auth/
 │   │   ├── LoginForm.tsx
 │   │   └── RegisterForm.tsx
-│   ├── failures/
-│   │   ├── FailureCard.tsx
-│   │   ├── FailureForm.tsx
-│   │   └── FailureList.tsx
+│   ├── challenges/
+│   │   ├── ChallengeCard.tsx
+│   │   ├── ChallengeForm.tsx
+│   │   └── ChallengeList.tsx
 │   ├── statistics/
 │   │   ├── TotalCounter.tsx
 │   │   ├── CalendarView.tsx
@@ -83,11 +83,11 @@ frontend/
 │   ├── api/
 │   │   ├── client.ts               # API クライアント設定
 │   │   ├── auth.ts                 # 認証API
-│   │   ├── failures.ts             # 失敗記録API
+│   │   ├── challenges.ts             # 挑戦記録API
 │   │   └── statistics.ts           # 統計API
 │   ├── hooks/
 │   │   ├── useAuth.ts
-│   │   ├── useFailures.ts
+│   │   ├── useChallenges.ts
 │   │   └── useStatistics.ts
 │   ├── context/
 │   │   └── AuthContext.tsx
@@ -141,20 +141,20 @@ frontend/
 
 ---
 
-### 2. 失敗記録機能（Core）
+### 2. 挑戦記録機能（Core）
 
-#### 2.1 失敗記録作成 (`/failures/new`)
+#### 2.1 挑戦記録作成 (`/challenges/new`)
 
 **フォームフィールド（MVP版）**
-- **失敗内容（content）**（必須）
-  - プレースホルダー: "どんな失敗をしたの？（例: 環境構築で1日溶かした）"
+- **挑戦内容（content）**（必須）
+  - プレースホルダー: "どんな挑戦をしたの？（例: 環境構築で1日溶かした）"
   - テキストエリア（複数行対応）
   - 最大文字数: 1000文字
 
 - **スコア（score）**（必須）
   - ラジオボタンまたはスライダー（1-5段階）
   - ラベル: ★で表す
-  - 説明: "この失敗の価値は？（挑戦度や学びの大きさ）"
+  - 説明: "この挑戦の価値は？（挑戦度や学びの大きさ）"
 
 **バリデーション**
 - すべてのフィールドが必須
@@ -162,24 +162,24 @@ frontend/
 - スコアは1-5の範囲内
 
 **送信処理**
-- `POST /failures` API呼び出し
-- 成功時: トースト通知 → 失敗一覧ページへリダイレクト
-- 失敗時: エラーメッセージ表示
+- `POST /challenges` API呼び出し
+- 成功時: トースト通知 → 挑戦一覧ページへリダイレクト
+- 挑戦時: エラーメッセージ表示
 
 **Note（将来拡張）**
 Phase 2では以下のフィールドを追加予定：
 - challenge_content（挑戦内容）
-- failure_content（失敗内容）
+- challenge_content（挑戦内容）
 - next_action（ネクストアクション）
 - challenge_level（チャレンジ度合い）
 - novelty_level（新しい度合い）
 
-#### 2.2 失敗記録一覧 (`/failures`)
+#### 2.2 挑戦記録一覧 (`/challenges`)
 
 **表示内容（MVP版）**
-- 失敗記録のリスト表示（カード形式推奨）
+- 挑戦記録のリスト表示（カード形式推奨）
 - 各カードに表示する情報：
-  - 失敗内容（content）- 省略形（最初の100文字）
+  - 挑戦内容（content）- 省略形（最初の100文字）
   - スコア（score）- ★アイコンで視覚化（例: ★★★☆☆）
   - 記録日時（created_at）- 相対時間表示（"3時間前"、"2日前"など）
   - 詳細ページへのリンク
@@ -190,46 +190,46 @@ Phase 2では以下のフィールドを追加予定：
 
 **UI/UX**
 - 空状態の表示（記録がない場合）
-  - メッセージ: "まだ失敗を記録していません"
-  - "失敗を記録する" ボタン → `/failures/new`
+  - メッセージ: "まだ挑戦を記録していません"
+  - "挑戦を記録する" ボタン → `/challenges/new`
 
 **Note（Phase 2で追加予定）**
 - 日付範囲フィルタ（開始日・終了日）
 - スコアフィルタ（1-5）
 - 検索機能
 
-#### 2.3 失敗記録詳細 (`/failures/[id]`)
+#### 2.3 挑戦記録詳細 (`/challenges/[id]`)
 
 **表示内容（MVP版）**
 - すべてのフィールドを完全に表示
-  - 失敗内容（content）- 全文表示
+  - 挑戦内容（content）- 全文表示
   - スコア（score）- ★アイコンで視覚的表現
   - 作成日時（created_at）- フルフォーマット表示
 
 **アクション**
-- 編集ボタン → `/failures/[id]/edit`
+- 編集ボタン → `/challenges/[id]/edit`
 - 削除ボタン（確認ダイアログ付き）
 - 一覧へ戻るボタン
 
-#### 2.4 失敗記録編集 (`/failures/[id]/edit`)
+#### 2.4 挑戦記録編集 (`/challenges/[id]/edit`)
 
 **フォーム**
 - 作成フォームと同じUI
 - 既存データを初期値として表示
 
 **送信処理**
-- `PUT /failures/{id}` API呼び出し
+- `PUT /challenges/{id}` API呼び出し
 - 成功時: トースト通知 → 詳細ページへリダイレクト
-- 失敗時: エラーメッセージ表示
+- 挑戦時: エラーメッセージ表示
 
-#### 2.5 失敗記録削除
+#### 2.5 挑戦記録削除
 
 **確認ダイアログ**
 - "本当に削除しますか？この操作は取り消せません。"
 - キャンセル / 削除ボタン
 
 **送信処理**
-- `DELETE /failures/{id}` API呼び出し
+- `DELETE /challenges/{id}` API呼び出し
 - 成功時: トースト通知 → 一覧ページへリダイレクト
 
 ---
@@ -237,29 +237,29 @@ Phase 2では以下のフィールドを追加予定：
 ### 3. ダッシュボード (`/`)
 
 **表示内容**
-- **累積失敗数カウンター**（大きく強調表示）
-  - "あなたの失敗貯金: XX回"
+- **累積挑戦数カウンター**（大きく強調表示）
+  - "あなたの挑戦貯金: XX回"
   - アニメーション効果（カウントアップ）
 
 - **今週の記録数**
   - "今週の挑戦: XX回"
 
-- **最近の失敗記録**（最新5件）
+- **最近の挑戦記録**（最新5件）
   - カード形式で表示
-  - "もっと見る" → `/failures`
+  - "もっと見る" → `/challenges`
 
 - **今週の統計プレビュー**
   - 簡易的な折れ線グラフ
   - "詳細を見る" → `/statistics`
 
 **アクション**
-- "失敗を記録する" ボタン（目立つ配置） → `/failures/new`
+- "挑戦を記録する" ボタン（目立つ配置） → `/challenges/new`
 
 ---
 
 ### 4. 統計・可視化 (`/statistics`)
 
-#### 4.1 累積失敗数カウンター
+#### 4.1 累積挑戦数カウンター
 - 全期間の総記録数を大きく表示
 - 前月比の増減（+XX回、-XX回）
 
@@ -272,7 +272,7 @@ Phase 2では以下のフィールドを追加予定：
   - チャレンジ度合いや新しい度合いの平均値で色分け（オプション）
 
 **インタラクション**
-- 日付クリックで、その日の失敗記録をポップアップ表示
+- 日付クリックで、その日の挑戦記録をポップアップ表示
 - 月切り替えボタン（前月/次月）
 
 **API呼び出し**
@@ -312,14 +312,14 @@ Phase 2では以下のフィールドを追加予定：
 ## UI/UXデザインガイドライン
 
 ### デザインコンセプト
-- **ポジティブで温かみのあるデザイン**: 失敗を肯定的に捉える
+- **ポジティブで温かみのあるデザイン**: 挑戦を肯定的に捉える
 - **シンプルで直感的**: 記録の障壁を最小限に
 - **視覚的フィードバック**: 成長が実感できる
 
 ### カラーパレット（例）
 - **Primary**: 挑戦を表す色（例: 青 #3B82F6）
 - **Secondary**: 成長を表す色（例: 緑 #10B981）
-- **Accent**: 失敗を温かく受け止める色（例: オレンジ #F59E0B）
+- **Accent**: 挑戦を温かく受け止める色（例: オレンジ #F59E0B）
 - **Background**: クリーンな背景（例: 白 #FFFFFF、グレー #F9FAFB）
 - **Text**: 読みやすい色（例: ダークグレー #1F2937）
 
@@ -361,7 +361,7 @@ Phase 2では以下のフィールドを追加予定：
 - ローディング状態（`isLoading`）
 - エラー状態（`error`）
 - データ状態（`data`）
-- カスタムフック（`useFailures`, `useStatistics`）で抽象化
+- カスタムフック（`useChallenges`, `useStatistics`）で抽象化
 
 ---
 
@@ -369,7 +369,7 @@ Phase 2では以下のフィールドを追加予定：
 
 ### ベースURL
 - 開発環境: `http://localhost:8000`
-- 本番環境: `https://api.failure-bank.com`（環境変数で管理）
+- 本番環境: `https://api.challenge-bank.com`（環境変数で管理）
 
 ### 認証ヘッダー
 ```typescript
@@ -383,12 +383,12 @@ Authorization: Bearer <access_token>
 - `POST /auth/login`: ログイン
 - `GET /auth/me`: 認証済みユーザー情報取得
 
-#### 失敗記録
-- `POST /failures`: 失敗記録作成
-- `GET /failures`: 失敗記録一覧取得
-- `GET /failures/{id}`: 失敗記録詳細取得
-- `PUT /failures/{id}`: 失敗記録更新
-- `DELETE /failures/{id}`: 失敗記録削除
+#### 挑戦記録
+- `POST /challenges`: 挑戦記録作成
+- `GET /challenges`: 挑戦記録一覧取得
+- `GET /challenges/{id}`: 挑戦記録詳細取得
+- `PUT /challenges/{id}`: 挑戦記録更新
+- `DELETE /challenges/{id}`: 挑戦記録削除
 
 #### 統計（MVP版）
 - `GET /stats/summary`: 統計サマリー取得（全期間、今週、今月）
@@ -437,25 +437,25 @@ export interface Token {
   token_type: string;
 }
 
-// ========== Failure関連の型（MVP版） ==========
+// ========== Challenge関連の型（MVP版） ==========
 
-// Failure型（MVP版：contentとscoreのみ）
-export interface Failure {
+// Challenge型（MVP版：contentとscoreのみ）
+export interface Challenge {
   id: string;
   user_id: string;
-  content: string;       // 失敗内容（MVP版では1つのフィールドに統合）
+  content: string;       // 挑戦内容（MVP版では1つのフィールドに統合）
   score: number;         // 1-5のスコア（挑戦度や学びの大きさ）
   created_at: string;
 }
 
-// Failure作成用型（MVP版）
-export interface FailureCreate {
+// Challenge作成用型（MVP版）
+export interface ChallengeCreate {
   content: string;
   score: number;         // 1-5
 }
 
-// Failure更新用型（MVP版）
-export interface FailureUpdate {
+// Challenge更新用型（MVP版）
+export interface ChallengeUpdate {
   content?: string;
   score?: number;        // 1-5
 }
@@ -483,7 +483,7 @@ export interface ApiError {
 
 // 期間別統計
 export interface PeriodStats {
-  failure_count: number;
+  challenge_count: number;
   total_score: number;
   average_score: number;
 }
@@ -498,7 +498,7 @@ export interface StatsSummary {
 // カレンダー日別データ
 export interface DayStats {
   date: string;          // "YYYY-MM-DD" 形式
-  failure_count: number;
+  challenge_count: number;
   total_score: number;
   average_score: number;
 }
@@ -512,11 +512,11 @@ export interface CalendarStats {
 
 // ========== Phase 2以降で拡張予定 ==========
 /*
-export interface FailureExtended {
+export interface ChallengeExtended {
   id: string;
   user_id: string;
   challenge_content: string;
-  failure_content: string;
+  challenge_content: string;
   next_action: string;
   challenge_level: 1 | 2 | 3;
   novelty_level: 1 | 2 | 3;
@@ -552,12 +552,12 @@ export const loginSchema = z.object({
   password: z.string().min(1, "パスワードを入力してください"),
 });
 
-// 失敗記録スキーマ（MVP版：contentとscoreのみ）
-export const failureSchema = z.object({
+// 挑戦記録スキーマ（MVP版：contentとscoreのみ）
+export const challengeSchema = z.object({
   content: z
     .string()
-    .min(1, "失敗内容を入力してください")
-    .max(1000, "失敗内容は1000文字以内で入力してください"),
+    .min(1, "挑戦内容を入力してください")
+    .max(1000, "挑戦内容は1000文字以内で入力してください"),
   score: z
     .number()
     .int("スコアは整数である必要があります")
@@ -567,15 +567,15 @@ export const failureSchema = z.object({
 
 // Phase 2以降で拡張予定
 /*
-export const failureSchemaExtended = z.object({
+export const challengeSchemaExtended = z.object({
   challenge_content: z
     .string()
     .min(1, "挑戦内容を入力してください")
     .max(500, "挑戦内容は500文字以内で入力してください"),
-  failure_content: z
+  challenge_content: z
     .string()
-    .min(1, "失敗内容を入力してください")
-    .max(1000, "失敗内容は1000文字以内で入力してください"),
+    .min(1, "挑戦内容を入力してください")
+    .max(1000, "挑戦内容は1000文字以内で入力してください"),
   next_action: z
     .string()
     .min(1, "ネクストアクションを入力してください")
@@ -593,7 +593,7 @@ export const failureSchemaExtended = z.object({
 ```bash
 # .env.local
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
-NEXT_PUBLIC_APP_NAME=Failure Bank
+NEXT_PUBLIC_APP_NAME=Challenge Bank
 ```
 
 ---
@@ -605,10 +605,10 @@ NEXT_PUBLIC_APP_NAME=Failure Bank
 - 1行の最大文字数: 100文字
 - フォーマッター: Prettier（セミコロンあり、シングルクォート）
 - 命名規則:
-  - コンポーネント: PascalCase（例: `FailureCard.tsx`）
+  - コンポーネント: PascalCase（例: `ChallengeCard.tsx`）
   - 関数/変数: camelCase（例: `getUserData`）
   - 定数: UPPER_SNAKE_CASE（例: `API_BASE_URL`）
-  - 型: PascalCase（例: `User`, `FailureCreate`）
+  - 型: PascalCase（例: `User`, `ChallengeCreate`）
 
 ### コンポーネント設計原則
 - **単一責任の原則**: 1つのコンポーネントは1つの責務のみ
@@ -650,8 +650,8 @@ NEXT_PUBLIC_APP_NAME=Failure Bank
 
 ### E2Eテスト（Phase 2）
 - クリティカルパスのテスト
-  - ユーザー登録 → ログイン → 失敗記録作成
-  - 失敗記録の編集・削除
+  - ユーザー登録 → ログイン → 挑戦記録作成
+  - 挑戦記録の編集・削除
 
 ---
 
@@ -681,7 +681,7 @@ NEXT_PUBLIC_APP_NAME=Failure Bank
 
 ### MVP Phase（Phase 1）
 - [x] 認証機能（登録・ログイン・ログアウト）
-- [ ] 失敗記録CRUD
+- [ ] 挑戦記録CRUD
 - [ ] ダッシュボード
 - [ ] 統計・可視化（累積カウンター、カレンダー、グラフ）
 
@@ -697,7 +697,7 @@ NEXT_PUBLIC_APP_NAME=Failure Bank
 - [ ] ダークモード
 - [ ] 多言語対応（i18n）
 - [ ] PWA対応（オフライン機能、インストール可能）
-- [ ] ソーシャル機能（失敗の共有）
+- [ ] ソーシャル機能（挑戦の共有）
 - [ ] AI分析・アドバイス生成
 
 ---

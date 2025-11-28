@@ -43,7 +43,7 @@ export function CalendarHeatmap() {
           const dateObj = new Date(day.date);
           return {
             date: day.date,
-            count: day.failure_count,
+            count: day.challenge_count,
             displayDate: `${dateObj.getMonth() + 1}/${dateObj.getDate()}`,
           };
         });
