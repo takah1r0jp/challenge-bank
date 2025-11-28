@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日も挑戦を記録しましょう！</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #555;
+        }
+        .stats-container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border-left: 4px solid #667eea;
+        }
+        .stats-title {
+            font-size: 14px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 5px 0;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .period {
+            font-size: 13px;
+            color: #666;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 14px 40px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 30px 0;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            transition: transform 0.2s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px 30px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+        .unsubscribe {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
+            .stat-value {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <h1>📊 今週の挑戦記録</h1>
+        </div>
+
+        <!-- コンテンツ -->
+        <div class="content">
+            <div class="greeting">
+                {{ email }} さん、こんにちは！<br>
+                今週も挑戦を記録することで、自分の成長を実感できます。アプリを開いて今日の挑戦を記録しましょう！
+            </div>
+
+            <!-- 統計情報カード -->
+            <div class="stats-container">
+                <div class="stats-title">📈 今週の成績</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ challenge_count }}</div>
+                        <div class="stat-label">挑戦回数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ total_score }}</div>
+                        <div class="stat-label">合計スコア</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ average_score }}</div>
+                        <div class="stat-label">平均スコア</div>
+                    </div>
+                </div>
+                <div class="period">
+                    期間: {{ week_start }} ～ {{ week_end }}
+                </div>
+            </div>
+
+            <!-- CTA ボタン -->
+            <a href="{{ app_url }}" class="cta-button">アプリを開く</a>
+
+            <p style="font-size: 14px; color: #666; margin-top: 30px;">
+                毎週コンスタントに挑戦を続けることで、習慣化され、やがて大きな成果につながります。<br>
+                一緒に目標達成を目指しましょう！
+            </p>
+        </div>
+
+        <!-- フッター -->
+        <div class="footer">
+            <p style="margin: 0 0 10px 0;">
+                Challenge Bank チーム
+            </p>
+            <p style="margin: 0;">
+                このメールは {{ email }} に送信されました。<br>
+                <a href="{{ app_url }}/settings" class="unsubscribe">通知設定を変更</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

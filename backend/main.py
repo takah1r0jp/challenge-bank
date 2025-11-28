@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
@@ -12,6 +12,7 @@ from auth import create_access_token, get_current_user, get_password_hash, verif
 
 # 必要なモジュール
 from database import get_db
+from email_service import send_notification_batch
 from models import Challenge, User
 from schemas import (
     CalendarResponse,
@@ -19,6 +20,8 @@ from schemas import (
     ChallengeResponse,
     ChallengeUpdate,
     DayStats,
+    NotificationBatchResponse,
+    NotificationTestResponse,
     PeriodStats,
     StatsSummaryResponse,
     SuccessResponse,
@@ -33,7 +36,7 @@ app = FastAPI(title="Challenge Bank")
 # CORS設定（環境変数から許可オリジンを取得）
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://localhost:3000"  # デフォルトは開発環境のみ
+    "http://localhost:3000",  # デフォルトは開発環境のみ
 ).split(",")
 
 app.add_middleware(
@@ -49,6 +52,15 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"message": "Challenge Bank API is running."}
+
+
+# ====== API Key認証 ======
+def verify_api_key(x_api_key: str = Header(None)):
+    """Lambda内部API用のAPI Key認証"""
+    expected_key = os.getenv("NOTIFICATION_API_KEY")
+    if not expected_key or x_api_key != expected_key:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid API key")
+    return True
 
 
 @app.exception_handler(HTTPException)
@@ -282,7 +294,9 @@ def get_challenges(
 
 
 # 挑戦記録の詳細を取得
-@app.get("/challenges/{challenge_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+@app.get(
+    "/challenges/{challenge_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse
+)
 def get_challenge_by_id(
     challenge_id: UUID,
     current_user: User = Depends(get_current_user),
@@ -314,7 +328,9 @@ def get_challenge_by_id(
 
 
 # 挑戦記録を更新
-@app.put("/challenges/{challenge_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse)
+@app.put(
+    "/challenges/{challenge_id}", status_code=status.HTTP_200_OK, response_model=SuccessResponse
+)
 def update_challenge(
     challenge_id: UUID,
     challenge_data: ChallengeUpdate,
@@ -533,4 +549,51 @@ def get_calendar(
         "success": True,
         "data": calendar_response.model_dump(),
         "message": "Calendar data retrieved successfully.",
+    }
+
+
+# ====== 通知エンドポイント ======
+
+
+@app.post(
+    "/notifications/send", status_code=status.HTTP_200_OK, response_model=NotificationBatchResponse
+)
+def send_notifications(
+    db: Session = Depends(get_db),
+    _: bool = Depends(verify_api_key),
+):
+    """Lambda内部API: 現在のJST時刻に対応するユーザーにメール通知を送信"""
+    result = send_notification_batch(db)
+    return {
+        "success": True,
+        "data": result,
+        "message": "Notification batch completed.",
+    }
+
+
+@app.post(
+    "/notifications/test", status_code=status.HTTP_200_OK, response_model=NotificationTestResponse
+)
+def send_test_notification(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """テスト用: 認証済みユーザーにテストメールを送信"""
+    from email_service import get_weekly_stats, send_notification_email
+
+    stats = get_weekly_stats(db, current_user.id)
+    success = send_notification_email(current_user, stats)
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send email"
+        )
+
+    return {
+        "success": True,
+        "data": {
+            "email": current_user.email,
+            "sent_at": datetime.now(timezone.utc).isoformat(),
+        },
+        "message": "Test notification email sent successfully.",
     }
