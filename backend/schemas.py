@@ -184,3 +184,47 @@ class UserWithToken(UserResponse):
 
     access_token: str
     token_type: str = "bearer"
+
+
+# ====== 通知関連 ======
+
+
+class FailedEmail(BaseModel):
+    """送信失敗したメール情報"""
+
+    user_id: str
+    email: str
+    error: str
+
+
+class NotificationBatchData(BaseModel):
+    """バッチ通知の実行結果データ"""
+
+    total_users: int
+    emails_sent: int
+    emails_failed: int
+    current_hour_jst: int
+    failed_emails: list[FailedEmail]
+
+
+class NotificationBatchResponse(BaseModel):
+    """バッチ通知エンドポイントのレスポンス"""
+
+    success: bool
+    data: NotificationBatchData
+    message: str | None = None
+
+
+class NotificationTestData(BaseModel):
+    """テスト通知の送信結果データ"""
+
+    email: str
+    sent_at: str
+
+
+class NotificationTestResponse(BaseModel):
+    """テスト通知エンドポイントのレスポンス"""
+
+    success: bool
+    data: NotificationTestData
+    message: str | None = None
