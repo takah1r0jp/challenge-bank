@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { challengeSchema } from "@/lib/utils/validators";
 import { apiClient, getErrorMessage } from "@/lib/api/client";
+import { useAuth } from "@/lib/context/AuthContext";
 import { toast } from "react-hot-toast";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { NotificationSetupDialog } from "@/components/notifications/NotificationSetupDialog";
 import { cn } from "@/lib/utils";
 
 type ChallengeFormData = {
@@ -28,8 +30,10 @@ type ChallengeFormData = {
 
 export default function NewChallengePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showNotificationDialog, setShowNotificationDialog] = useState(false);
 
   const {
     register,
@@ -53,13 +57,24 @@ export default function NewChallengePage() {
     try {
       await apiClient.post("/challenges", data);
       toast.success(`+${data.score}点！また一歩成長しました`);
-      router.push("/");
+
+      // 通知設定が未完了の場合、ダイアログを表示
+      if (user && !user.is_notification_setup_completed) {
+        setShowNotificationDialog(true);
+      } else {
+        router.push("/");
+      }
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSetupLater = async () => {
+    // 何もせずダッシュボードへ（バナーが表示される）
+    router.push("/");
   };
 
   const handleCancel = () => {
@@ -94,7 +109,7 @@ export default function NewChallengePage() {
                 </Label>
                 <Textarea
                   id="content"
-                  placeholder="どんな挑戦をして、どんな挑戦をしましたか？"
+                  placeholder="どんな挑戦をしましたか？"
                   rows={5}
                   className={cn(
                     "resize-none",
@@ -208,6 +223,13 @@ export default function NewChallengePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* 通知設定促進ダイアログ */}
+      <NotificationSetupDialog
+        open={showNotificationDialog}
+        onOpenChange={setShowNotificationDialog}
+        onSetupLater={handleSetupLater}
+      />
     </div>
   );
 }

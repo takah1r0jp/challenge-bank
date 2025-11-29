@@ -33,6 +33,7 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
     password: str | None = Field(default=None, min_length=8)
     notification_time: str | None = None
+    is_notification_setup_completed: bool | None = None
 
     @field_validator("notification_time")
     @classmethod
@@ -54,6 +55,7 @@ class UserResponse(BaseModel):
     id: UUID
     email: EmailStr
     notification_time: str | None = None
+    is_notification_setup_completed: bool = False
     created_at: datetime
 
     model_config = {"from_attributes": True}  # SQLAlchemyモデルから変換可能に

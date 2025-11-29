@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { WeeklyTrendChart } from "@/components/dashboard/WeeklyTrendChart";
 import { ScoreDistributionChart } from "@/components/dashboard/ScoreDistributionChart";
 import { CalendarHeatmap } from "@/components/dashboard/CalendarHeatmap";
+import { NotificationSetupBanner } from "@/components/notifications/NotificationSetupBanner";
 import { Plus, Clock, Calendar as CalendarIcon, TrendingUp } from "lucide-react";
 
 /**
@@ -23,7 +24,7 @@ import { Plus, Clock, Calendar as CalendarIcon, TrendingUp } from "lucide-react"
  */
 export default function DashboardPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   // 統計データ
   const [stats, setStats] = useState<StatsSummary | null>(null);
@@ -106,6 +107,11 @@ export default function DashboardPage() {
           </Button>
         </Link>
       </div>
+
+      {/* 通知設定バナー */}
+      {user && !user.is_notification_setup_completed && (
+        <NotificationSetupBanner />
+      )}
 
       {/* 統計サマリー */}
       {stats && (
