@@ -56,6 +56,14 @@ export function Header() {
               >
                 挑戦一覧
               </Link>
+              <Link
+                href="/settings"
+                className={`text-sm font-medium transition-colors hover:text-blue-600 ${
+                  isActive("/settings") ? "text-blue-600" : "text-gray-600"
+                }`}
+              >
+                設定
+              </Link>
             </nav>
           </div>
 
