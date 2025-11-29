@@ -8,6 +8,7 @@ export interface User {
   id: string;
   email: string;
   notification_time?: string; // "HH:MM" 形式（例: "20:00"）
+  is_notification_setup_completed: boolean; // 通知設定完了フラグ
   created_at: string;
 }
 
