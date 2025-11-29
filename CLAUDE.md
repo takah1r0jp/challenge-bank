@@ -105,14 +105,17 @@ backend/
 - [x] 統計サマリー取得（`GET /stats/summary`）- 全期間/今週/今月
 - [x] カレンダーデータ取得（`GET /stats/calendar`）- 日別統計、JST対応
 
+**通知機能:**
+- [x] メール送信機能（Resend統合）
+- [x] バッチ送信API（`POST /notifications/send`）- APIキー認証
+- [x] テスト送信API（`POST /notifications/test`）- ユーザー認証
+- [x] AWS Lambda関数（EventBridge定期実行）
+- [x] 週次統計メール（HTMLテンプレート対応）
+
 ### 🚧 今後の実装予定（優先度順）
 1. **フィルタリング・検索機能**
    - [ ] 日付範囲フィルタ（start_date, end_date）
    - [ ] ソート機能（日付順、スコア順など）
-
-2. **通知機能**
-   - [ ] メール送信機能（SendGrid/Resend統合）
-   - [ ] スケジューラー設定（定期実行）
 
 3. **Challengeモデルの拡張（将来的な機能）**
    - [ ] challenge_content（挑戦内容）
