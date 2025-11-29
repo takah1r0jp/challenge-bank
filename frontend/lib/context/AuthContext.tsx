@@ -13,6 +13,7 @@ interface AuthContextType {
   user: User | null; // 現在ログイン中のユーザー（未ログインならnull）
   isLoading: boolean; // 認証状態確認中かどうか
   isAuthenticated: boolean; // ログイン済みかどうか
+  updateUser: (user: User) => void; // ユーザー情報を上書きする
   login: (credentials: AuthCredentials) => Promise<void>; // ログイン関数
   register: (credentials: AuthCredentials) => Promise<void>; // 登録関数
   logout: () => void; // ログアウト関数
@@ -152,6 +153,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/login");
   };
 
+  /**
+   * ユーザー情報を上書きするユーティリティ
+   * 外部（例：設定ページ）からユーザー情報を更新する際に使う
+   */
+  const updateUser = (newUser: User) => {
+    setUser(newUser);
+  };
+
   // コンテキストの値
   const value: AuthContextType = {
     user,
@@ -160,6 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     register,
     logout,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
