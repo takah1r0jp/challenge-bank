@@ -88,10 +88,12 @@ def test_send_notification_email_success(monkeypatch, db, tmp_path):
 
     # sys.modulesに簡易resendモックを差し込む
     class DummyEmails:
-        def send(self, **kwargs):
+        @staticmethod
+        def send(params):
             return {"id": "msg_123"}
 
     class DummyResend:
+        api_key = None
         Emails = DummyEmails
 
     monkeypatch.setitem(sys.modules, "resend", DummyResend())
@@ -149,10 +151,12 @@ def test_send_endpoint_success(client, monkeypatch, db):
 
     # Resendモック
     class DummyEmails:
-        def send(self, **kwargs):
+        @staticmethod
+        def send(params):
             return {"id": "msg_test"}
 
     class DummyResend:
+        api_key = None
         Emails = DummyEmails
 
     monkeypatch.setitem(sys.modules, "resend", DummyResend())
@@ -212,10 +216,12 @@ def test_test_endpoint_success(client, monkeypatch, db, auth_token):
 
     # Resendモック
     class DummyEmails:
-        def send(self, **kwargs):
+        @staticmethod
+        def send(params):
             return {"id": "msg_test"}
 
     class DummyResend:
+        api_key = None
         Emails = DummyEmails
 
     monkeypatch.setitem(sys.modules, "resend", DummyResend())
@@ -248,11 +254,13 @@ def test_send_notification_batch_integration(client, monkeypatch, db):
     sent_emails = []
 
     class DummyEmails:
-        def send(self, **kwargs):
-            sent_emails.append(kwargs)
+        @staticmethod
+        def send(params):
+            sent_emails.append(params)
             return {"id": "msg_integration"}
 
     class DummyResend:
+        api_key = None
         Emails = DummyEmails
 
     monkeypatch.setitem(sys.modules, "resend", DummyResend())

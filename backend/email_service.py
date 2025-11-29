@@ -99,9 +99,9 @@ def send_notification_email(user: User, stats: dict[str, Any]) -> bool:
         # インポートを実行時に行うことでテスト時にsys.modules経由で差し替え可能にする
         import importlib
 
-        print(f"📦 Importing resend module...")
+        print("📦 Importing resend module...")
         resend = importlib.import_module("resend")
-        print(f"✅ Resend module imported successfully")
+        print("✅ Resend module imported successfully")
 
         app_url = os.getenv("APP_URL", "https://example.com")
         from_email = os.getenv("FROM_EMAIL", "noreply@example.com")
@@ -137,65 +137,31 @@ def send_notification_email(user: User, stats: dict[str, Any]) -> bool:
                 f"アプリへ: {app_url}\n"
             )
 
-        # ResendのクライアントAPIは環境によって異なるため柔軟に対応
-        # 1) モジュールが Resend クラスを提供する場合
-        if hasattr(resend, "Resend"):
-            print(f"📧 Attempting to send email to {user.email} using resend.Resend class")
-            api_key = os.getenv("RESEND_API_KEY")
-            if not api_key:
-                print(f"❌ RESEND_API_KEY not found in environment variables")
-                return False
-            print(f"✅ RESEND_API_KEY found: {api_key[:8]}...")
-            client = resend.Resend(api_key)
-            emails_client = getattr(client, "emails", None) or getattr(client, "Emails", None)
-            if emails_client is None:
-                # モジュール実装が想定と異なる場合は失敗
-                print(f"❌ emails_client is None - resend client structure unexpected")
-                return False
-            # instance may be attribute or class
-            if callable(emails_client):
-                emails = emails_client()
-            else:
-                emails = emails_client
-
-            # HTMLとテキストの両方を送信（マルチパート）
-            kwargs = {
-                "from_": from_email,
-                "to": [user.email],
-                "subject": subject,
-            }
-            if html_body:
-                kwargs["html"] = html_body
-            if text_body:
-                kwargs["text"] = text_body
-
-            emails.send(**kwargs)
-            print(f"✅ Email sent successfully to {user.email}")
-
-        # 2) モジュール自体が Emails 属性を持っている場合
-        elif hasattr(resend, "Emails"):
-            print(f"📧 Attempting to send email to {user.email} using resend.Emails class")
-            emails_cls = resend.Emails
-            emails = emails_cls()
-
-            kwargs = {
-                "from_": from_email,
-                "to": [user.email],
-                "subject": subject,
-            }
-            if html_body:
-                kwargs["html"] = html_body
-            if text_body:
-                kwargs["text"] = text_body
-
-            emails.send(**kwargs)
-            print(f"✅ Email sent successfully to {user.email}")
-
-        else:
-            # 未対応のクライアント
-            print(f"❌ Unsupported resend client - no Resend class or Emails attribute found")
-            print(f"   Available attributes: {dir(resend)}")
+        # Resend APIキーを設定
+        api_key = os.getenv("RESEND_API_KEY")
+        if not api_key:
+            print("❌ RESEND_API_KEY not found in environment variables")
             return False
+        print(f"✅ RESEND_API_KEY found: {api_key[:8]}...")
+
+        # APIキーをresendモジュールに設定
+        resend.api_key = api_key
+
+        # メール送信パラメータを準備（正しいResend Python SDK形式）
+        print(f"📧 Attempting to send email to {user.email}")
+        params = {
+            "from": from_email,  # "from"が正しいパラメータ名
+            "to": [user.email],
+            "subject": subject,
+        }
+        if html_body:
+            params["html"] = html_body
+        if text_body:
+            params["text"] = text_body
+
+        # Resend APIでメール送信（静的メソッドとして呼び出す）
+        email = resend.Emails.send(params)
+        print(f"✅ Email sent successfully to {user.email}, ID: {email.get('id', 'N/A')}")
 
         return True
 
