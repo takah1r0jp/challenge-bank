@@ -191,9 +191,12 @@ def update_me(
     db: Session = Depends(get_db),
 ):
     """認証済みユーザーの情報を更新するエンドポイント"""
-    # notification_timeのみ更新可能（将来的にemailやpasswordも追加可能）
+    # notification_time, is_notification_setup_completedを更新可能
     if user_data.notification_time is not None:
         current_user.notification_time = user_data.notification_time
+
+    if user_data.is_notification_setup_completed is not None:
+        current_user.is_notification_setup_completed = user_data.is_notification_setup_completed
 
     try:
         db.commit()

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, Uuid
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -21,6 +21,9 @@ class User(Base):
     notification_time: Mapped[str] = mapped_column(
         String(5), default="20:00", nullable=True
     )  # "HH:MM"形式で保存
+    is_notification_setup_completed: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )  # 通知設定完了フラグ
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(), nullable=False
     )

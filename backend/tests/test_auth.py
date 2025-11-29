@@ -229,6 +229,37 @@ class TestUpdateUser:
         response = client.put("/auth/me", json={"notification_time": "09:30"})
         assert response.status_code == 401
 
+    def test_update_notification_setup_completed_success(self, client: TestClient, db: Session):
+        """正常系: is_notification_setup_completedフラグを更新できる"""
+        # ユーザーを登録
+        register_response = client.post(
+            "/auth/register",
+            json={
+                "email": "test@example.com",
+                "password": "password123",
+            },
+        )
+        token = register_response.json()["data"]["access_token"]
+
+        # 初期値はFalse
+        me_response = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
+        assert me_response.json()["data"]["is_notification_setup_completed"] is False
+
+        # is_notification_setup_completedをTrueに更新
+        response = client.put(
+            "/auth/me",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"is_notification_setup_completed": True},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert data["data"]["is_notification_setup_completed"] is True
+
+        # 更新後も値が保持されているか確認
+        me_response = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
+        assert me_response.json()["data"]["is_notification_setup_completed"] is True
+
 
 class TestLogout:
     """POST /auth/logout のテスト"""
