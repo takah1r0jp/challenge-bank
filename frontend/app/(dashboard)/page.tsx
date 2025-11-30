@@ -14,12 +14,12 @@ import { WeeklyTrendChart } from "@/components/dashboard/WeeklyTrendChart";
 import { ScoreDistributionChart } from "@/components/dashboard/ScoreDistributionChart";
 import { CalendarHeatmap } from "@/components/dashboard/CalendarHeatmap";
 import { NotificationSetupBanner } from "@/components/notifications/NotificationSetupBanner";
-import { Plus, Clock, Calendar as CalendarIcon, TrendingUp } from "lucide-react";
+import { Plus, Clock, Calendar as CalendarIcon, TrendingUp, Sun } from "lucide-react";
 
 /**
  * ダッシュボードページ
  * - 新しい挑戦を記録するボタン
- * - 統計サマリー（全期間、今週、今月）
+ * - 統計サマリー（今日、今週、全期間）
  * - 最近の挑戦記録（直近5件）
  */
 export default function DashboardPage() {
@@ -121,9 +121,9 @@ export default function DashboardPage() {
           </h2>
           <div className="grid gap-4 md:grid-cols-3">
             <StatsCard
-              title="全期間"
-              stats={stats.all_time}
-              icon={<TrendingUp className="h-5 w-5" />}
+              title="今日"
+              stats={stats.today}
+              icon={<Sun className="h-5 w-5" />}
               delay={0}
             />
             <StatsCard
@@ -133,9 +133,9 @@ export default function DashboardPage() {
               delay={0.1}
             />
             <StatsCard
-              title="今月"
-              stats={stats.this_month}
-              icon={<CalendarIcon className="h-5 w-5" />}
+              title="全期間"
+              stats={stats.all_time}
+              icon={<TrendingUp className="h-5 w-5" />}
               delay={0.2}
             />
           </div>

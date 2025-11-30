@@ -25,7 +25,7 @@ class User(Base):
         Boolean, default=False, nullable=False
     )  # 通知設定完了フラグ
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(), nullable=False
+        DateTime, default=lambda: datetime.utcnow(), nullable=False
     )
 
     # リレーション
@@ -47,7 +47,7 @@ class Challenge(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     score: Mapped[int] = mapped_column(Integer, nullable=False)  # 挑戦の質を数値化したもの
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(), nullable=False
+        DateTime, default=lambda: datetime.utcnow(), nullable=False
     )
 
     # リレーション（型ヒント付き）

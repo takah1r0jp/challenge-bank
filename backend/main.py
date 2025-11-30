@@ -426,25 +426,25 @@ def get_stats_summary(
     # 現在の日本時間
     now_jst = datetime.now(jst)
 
+    # 今日の開始日（日本時間の0時）
+    today_start_jst = now_jst.replace(hour=0, minute=0, second=0, microsecond=0)
+
     # 今週の開始日（日本時間の月曜日0時）
     week_start_jst = now_jst - timedelta(days=now_jst.weekday())
     week_start_jst = week_start_jst.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    # 今月の開始日（日本時間の1日0時）
-    month_start_jst = now_jst.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-
     # JSTをUTCに変換（DBと比較するため、tzinfo=Noneで取得）
+    today_start_utc = today_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
     week_start_utc = week_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
-    month_start_utc = month_start_jst.astimezone(timezone.utc).replace(tzinfo=None)
 
     # 自分の挑戦記録を取得
     all_challenges = db.query(Challenge).filter(Challenge.user_id == current_user.id).all()
 
+    # 今日の挑戦記録（UTCで比較）
+    today_challenges = [f for f in all_challenges if f.created_at >= today_start_utc]
+
     # 今週の挑戦記録（UTCで比較）
     this_week_challenges = [f for f in all_challenges if f.created_at >= week_start_utc]
-
-    # 今月の挑戦記録（UTCで比較）
-    this_month_challenges = [f for f in all_challenges if f.created_at >= month_start_utc]
 
     # ヘルパー関数: 期間別の統計を計算
     def calculate_period_stats(challenges_list):
@@ -460,12 +460,12 @@ def get_stats_summary(
         )
 
     # 各期間の統計を計算
-    all_time_stats = calculate_period_stats(all_challenges)
+    today_stats = calculate_period_stats(today_challenges)
     this_week_stats = calculate_period_stats(this_week_challenges)
-    this_month_stats = calculate_period_stats(this_month_challenges)
+    all_time_stats = calculate_period_stats(all_challenges)
 
     stats_response = StatsSummaryResponse(
-        all_time=all_time_stats, this_week=this_week_stats, this_month=this_month_stats
+        today=today_stats, this_week=this_week_stats, all_time=all_time_stats
     )
 
     return {
@@ -529,7 +529,7 @@ def get_calendar(
         created_at_jst = challenge.created_at.replace(tzinfo=timezone.utc).astimezone(jst)
         date_str = created_at_jst.strftime("%Y-%m-%d")
         daily_stats[date_str].append(challenge)
-
+    
     # 日別統計を計算
     days_list = []
     for date_str, challenges_on_day in sorted(daily_stats.items()):

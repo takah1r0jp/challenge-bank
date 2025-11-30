@@ -151,9 +151,9 @@ class PeriodStats(BaseModel):
 class StatsSummaryResponse(BaseModel):
     """統計サマリーのレスポンス"""
 
-    all_time: PeriodStats
+    today: PeriodStats
     this_week: PeriodStats
-    this_month: PeriodStats
+    all_time: PeriodStats
 
 
 class DayStats(BaseModel):

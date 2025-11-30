@@ -107,7 +107,7 @@ export interface ApiError {
   error: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
 }
 
@@ -126,12 +126,12 @@ export interface PeriodStats {
 /**
  * 統計サマリー
  * GET /stats/summary のレスポンス
- * 全期間、今週、今月の統計を含む
+ * 今日、今週、全期間の統計を含む
  */
 export interface StatsSummary {
-  all_time: PeriodStats;
+  today: PeriodStats;
   this_week: PeriodStats;
-  this_month: PeriodStats;
+  all_time: PeriodStats;
 }
 
 /**
