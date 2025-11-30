@@ -24,15 +24,15 @@ def test_get_stats_summary_success(client, auth_token):
     assert data["data"]["all_time"]["total_score"] == 6  # 1 + 2 + 3
     assert data["data"]["all_time"]["average_score"] == 2.0  # 6 / 3
 
+    # 今日の統計（今日作成したので同じ）
+    assert data["data"]["today"]["challenge_count"] == 3
+    assert data["data"]["today"]["total_score"] == 6
+    assert data["data"]["today"]["average_score"] == 2.0
+
     # 今週の統計（今日作成したので同じ）
     assert data["data"]["this_week"]["challenge_count"] == 3
     assert data["data"]["this_week"]["total_score"] == 6
     assert data["data"]["this_week"]["average_score"] == 2.0
-
-    # 今月の統計（今日作成したので同じ）
-    assert data["data"]["this_month"]["challenge_count"] == 3
-    assert data["data"]["this_month"]["total_score"] == 6
-    assert data["data"]["this_month"]["average_score"] == 2.0
 
     assert "message" in data
 
@@ -45,20 +45,20 @@ def test_get_stats_summary_no_challenges(client, auth_token):
     data = response.json()
     assert data["success"] is True
 
-    # 全期間
-    assert data["data"]["all_time"]["challenge_count"] == 0
-    assert data["data"]["all_time"]["total_score"] == 0
-    assert data["data"]["all_time"]["average_score"] == 0.0
+    # 今日
+    assert data["data"]["today"]["challenge_count"] == 0
+    assert data["data"]["today"]["total_score"] == 0
+    assert data["data"]["today"]["average_score"] == 0.0
 
     # 今週
     assert data["data"]["this_week"]["challenge_count"] == 0
     assert data["data"]["this_week"]["total_score"] == 0
     assert data["data"]["this_week"]["average_score"] == 0.0
 
-    # 今月
-    assert data["data"]["this_month"]["challenge_count"] == 0
-    assert data["data"]["this_month"]["total_score"] == 0
-    assert data["data"]["this_month"]["average_score"] == 0.0
+    # 全期間
+    assert data["data"]["all_time"]["challenge_count"] == 0
+    assert data["data"]["all_time"]["total_score"] == 0
+    assert data["data"]["all_time"]["average_score"] == 0.0
 
 
 def test_get_stats_summary_no_token(client):
