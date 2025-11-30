@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import type { PieLabelRenderProps, LegendPayload } from "recharts";
 import { apiClient, getErrorMessage } from "@/lib/api/client";
 import { ApiResponse, Challenge } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartSkeleton } from "./ChartSkeleton";
 import { PieChartIcon } from "lucide-react";
+import { getScoreColor } from "@/lib/constants/colors";
 
 interface ScoreDistribution {
   score: number;
@@ -15,9 +17,6 @@ interface ScoreDistribution {
   percentage: number;
   [key: string]: number; // Recharts互換のためのインデックスシグネチャ
 }
-
-// Material Design 3のカラーパレット（トーナルカラー）
-const COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
 
 /**
  * スコア分布チャート
@@ -107,8 +106,13 @@ export function ScoreDistributionChart() {
   }
 
   // カスタムラベル（Material Design 3: タイポグラフィ）
-  const renderCustomLabel = (entry: any) => {
-    return `${entry.percentage.toFixed(0)}%`;
+  const renderCustomLabel = (props: PieLabelRenderProps) => {
+    // PieLabelRenderProps は `percent` (0..1) と `payload` (original data)を提供する.
+    // Prefer 提供されたpercentが利用可能であればそれを使い、そうでなければpayload.percentageを使う.
+    const percentFromProps = typeof props?.percent === "number" ? props.percent * 100 : undefined;
+    const percentFromPayload = typeof props?.payload?.percentage === "number" ? props.payload.percentage : undefined;
+    const pct = percentFromProps ?? percentFromPayload ?? 0;
+    return `${Math.round(pct)}%`;
   };
 
   return (
@@ -124,7 +128,7 @@ export function ScoreDistributionChart() {
             スコア分布
           </CardTitle>
           <p className="text-sm text-gray-500">
-            最新100件のチャレンジレベル（最多: {mostCommonScore}点）
+            最新100件のチャレンジスコア（最多: {mostCommonScore}点）
           </p>
         </CardHeader>
         <CardContent>
@@ -144,10 +148,10 @@ export function ScoreDistributionChart() {
                 animationDuration={800}
                 animationEasing="ease-out"
               >
-                {data.map((entry, index) => (
+                {data.map((entry) => (
                   <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
+                    key={`cell-${entry.score}`}
+                    fill={getScoreColor(entry.score)}
                     stroke="white"
                     strokeWidth={2}
                   />
@@ -161,15 +165,31 @@ export function ScoreDistributionChart() {
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                   padding: "8px 12px",
                 }}
-                formatter={(value: number, name: string, entry: any) => [
-                  `${value}回 (${entry.payload.percentage.toFixed(1)}%)`,
-                  `${entry.payload.score}点`,
-                ]}
+                formatter={(
+                  value: number,
+                  name: string,
+                  entry: { payload?: ScoreDistribution } | undefined
+                ) => {
+                  const percent = entry?.payload?.percentage;
+                  const percentText = typeof percent === "number" ? `${percent.toFixed(1)}%` : "-";
+                  const score = entry?.payload?.score ?? "-";
+                  return [`${value}回 (${percentText})`, `${score}点`];
+                }}
               />
               <Legend
                 verticalAlign="bottom"
                 height={36}
-                formatter={(value, entry: any) => `${entry.payload.score}点`}
+                formatter={(
+                  value: string | number | undefined,
+                  entry: LegendPayload | undefined
+                ) => {
+                  // LegendPayload.payload はチャートによって異なる型になる可能性があるため、ガードしてスコアを抽出
+                  const payload = entry?.payload as unknown;
+                  const hasScore =
+                    typeof payload === "object" && payload !== null && "score" in (payload as Record<string, unknown>);
+                  const score = hasScore ? (payload as ScoreDistribution).score : "-";
+                  return `${score}点`;
+                }}
                 iconType="circle"
                 wrapperStyle={{
                   fontSize: "14px",

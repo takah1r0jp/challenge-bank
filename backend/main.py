@@ -31,6 +31,9 @@ from schemas import (
     UserWithToken,
 )
 
+# 日本標準時（JST: UTC+9）のタイムゾーン定義
+jst = timezone(timedelta(hours=9))
+
 app = FastAPI(title="Challenge Bank")
 
 # CORS設定（環境変数から許可オリジンを取得）
@@ -253,12 +256,15 @@ def create_challenge(
     db.commit()
     db.refresh(new_challenge)
 
-    # レスポンスを返す
-    challenge_response = ChallengeResponse.model_validate(new_challenge)
+    # レスポンスを返す（UTC→JST変換）
+    challenge_dict = ChallengeResponse.model_validate(new_challenge).model_dump()
+    # UTC naive datetime → UTC aware → JST aware に変換
+    created_at_jst = new_challenge.created_at.replace(tzinfo=timezone.utc).astimezone(jst)
+    challenge_dict["created_at"] = created_at_jst.isoformat()
 
     return {
         "success": True,
-        "data": challenge_response.model_dump(),
+        "data": challenge_dict,
         "message": "Challenge record created successfully.",
     }
 
@@ -284,10 +290,14 @@ def get_challenges(
         .all()
     )
 
-    # レスポンスを返す
-    challenges_response = [
-        ChallengeResponse.model_validate(challenge).model_dump() for challenge in challenges
-    ]
+    # レスポンスを返す（UTC→JST変換）
+    challenges_response = []
+    for challenge in challenges:
+        challenge_dict = ChallengeResponse.model_validate(challenge).model_dump()
+        # UTC naive datetime → UTC aware → JST aware に変換
+        created_at_jst = challenge.created_at.replace(tzinfo=timezone.utc).astimezone(jst)
+        challenge_dict["created_at"] = created_at_jst.isoformat()
+        challenges_response.append(challenge_dict)
 
     return {
         "success": True,
@@ -320,12 +330,15 @@ def get_challenge_by_id(
             detail="Challenge record not found.",
         )
 
-    # レスポンスを返す
-    challenge_response = ChallengeResponse.model_validate(challenge)
+    # レスポンスを返す（UTC→JST変換）
+    challenge_dict = ChallengeResponse.model_validate(challenge).model_dump()
+    # UTC naive datetime → UTC aware → JST aware に変換
+    created_at_jst = challenge.created_at.replace(tzinfo=timezone.utc).astimezone(jst)
+    challenge_dict["created_at"] = created_at_jst.isoformat()
 
     return {
         "success": True,
-        "data": challenge_response.model_dump(),
+        "data": challenge_dict,
         "message": "Challenge record retrieved successfully.",
     }
 
@@ -364,12 +377,15 @@ def update_challenge(
     db.commit()
     db.refresh(challenge)
 
-    # レスポンスを返す
-    challenge_response = ChallengeResponse.model_validate(challenge)
+    # レスポンスを返す（UTC→JST変換）
+    challenge_dict = ChallengeResponse.model_validate(challenge).model_dump()
+    # UTC naive datetime → UTC aware → JST aware に変換
+    created_at_jst = challenge.created_at.replace(tzinfo=timezone.utc).astimezone(jst)
+    challenge_dict["created_at"] = created_at_jst.isoformat()
 
     return {
         "success": True,
-        "data": challenge_response.model_dump(),
+        "data": challenge_dict,
         "message": "Challenge record updated successfully.",
     }
 
@@ -419,9 +435,6 @@ def get_stats_summary(
     db: Session = Depends(get_db),
 ):
     """認証済みユーザーの統計サマリーを取得するエンドポイント"""
-
-    # 日本時間のタイムゾーン（JST = UTC+9）
-    jst = timezone(timedelta(hours=9))
 
     # 現在の日本時間
     now_jst = datetime.now(jst)
@@ -491,9 +504,6 @@ def get_calendar(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Month must be between 1 and 12.",
         )
-
-    # 日本時間のタイムゾーン
-    jst = timezone(timedelta(hours=9))
 
     # 指定月の開始日（日本時間）
     month_start_jst = datetime(year, month, 1, 0, 0, 0, tzinfo=jst)
