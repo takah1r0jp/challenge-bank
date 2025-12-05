@@ -274,9 +274,13 @@ def test_send_notification_batch_integration(client, monkeypatch, db):
     # 複数ユーザーを作成
     u1 = User(email="integration1@example.com", hashed_password="x", notification_time=hour_str)
     u2 = User(email="integration2@example.com", hashed_password="x", notification_time=hour_str)
+    # u3は確実に異なる時刻を設定（現在時刻の1時間後、24時間制を考慮）
+    different_hour = (current_hour + 1) % 24
     u3 = User(
-        email="integration3@example.com", hashed_password="x", notification_time="19:00"
-    )  # 別時刻
+        email="integration3@example.com",
+        hashed_password="x",
+        notification_time=f"{different_hour:02d}:00",
+    )
 
     db.add_all([u1, u2, u3])
     db.commit()
