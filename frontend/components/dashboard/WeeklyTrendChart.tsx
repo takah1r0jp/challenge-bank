@@ -10,6 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  LabelList,
 } from "recharts";
 import { apiClient, getErrorMessage } from "@/lib/api/client";
 import { ApiResponse, Challenge } from "@/lib/types";
@@ -31,6 +32,8 @@ interface ChartDataPoint {
   score3: number;
   score4: number;
   score5: number;
+  totalScore: number;
+  topScore: number;
 }
 
 /**
@@ -80,14 +83,30 @@ export function WeeklyTrendChart() {
           const dateStr = getWeekDayDateString(i, 0); // 0 = 日曜始まり
           const scoreMap = dailyScores.get(dateStr) || new Map();
 
+          const score1 = (scoreMap.get(1) || 0) * 1;
+          const score2 = (scoreMap.get(2) || 0) * 2;
+          const score3 = (scoreMap.get(3) || 0) * 3;
+          const score4 = (scoreMap.get(4) || 0) * 4;
+          const score5 = (scoreMap.get(5) || 0) * 5;
+
+          // 最も下にあるスコアブロック（最小レベル）を決定
+          let topScore = 0;
+          if (score1 > 0) topScore = 1;
+          else if (score2 > 0) topScore = 2;
+          else if (score3 > 0) topScore = 3;
+          else if (score4 > 0) topScore = 4;
+          else if (score5 > 0) topScore = 5;
+
           chartData.push({
             date: dateStr,
             displayDate: weekDays[i],
-            score1: (scoreMap.get(1) || 0) * 1,
-            score2: (scoreMap.get(2) || 0) * 2,
-            score3: (scoreMap.get(3) || 0) * 3,
-            score4: (scoreMap.get(4) || 0) * 4,
-            score5: (scoreMap.get(5) || 0) * 5,
+            score1,
+            score2,
+            score3,
+            score4,
+            score5,
+            totalScore: score1 + score2 + score3 + score4 + score5,
+            topScore,
           });
         }
 
@@ -127,7 +146,7 @@ export function WeeklyTrendChart() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
               data={data}
-              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              margin={{ top: 30, right: 10, left: -20, bottom: 0 }}
             >
               {/* グリッド線（Material Design 3: subtle） */}
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
@@ -177,35 +196,165 @@ export function WeeklyTrendChart() {
                 fill={SCORE_COLORS[5]}
                 animationDuration={800}
                 animationEasing="ease-out"
-              />
+              >
+                <LabelList
+                  dataKey="totalScore"
+                  position="top"
+                  offset={8}
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    fill: "#374151",
+                  }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  content={(props: any) => {
+                    const { x, y, width, value, index } = props;
+                    if (index === undefined) return null;
+                    const payload = data[index];
+                    if (payload?.topScore !== 5) return null;
+                    return (
+                      <text
+                        x={x + width / 2}
+                        y={y - 4}
+                        fill="#374151"
+                        textAnchor="middle"
+                        fontSize="13"
+                        fontWeight="600"
+                      >
+                        {value}
+                      </text>
+                    );
+                  }}
+                />
+              </Bar>
               <Bar
                 dataKey="score4"
                 stackId="a"
                 fill={SCORE_COLORS[4]}
                 animationDuration={800}
                 animationEasing="ease-out"
-              />
+              >
+                <LabelList
+                  dataKey="totalScore"
+                  position="top"
+                  offset={8}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  content={(props: any) => {
+                    const { x, y, width, value, index } = props;
+                    if (index === undefined) return null;
+                    const payload = data[index];
+                    if (payload?.topScore !== 4) return null;
+                    return (
+                      <text
+                        x={x + width / 2}
+                        y={y - 4}
+                        fill="#374151"
+                        textAnchor="middle"
+                        fontSize="13"
+                        fontWeight="600"
+                      >
+                        {value}
+                      </text>
+                    );
+                  }}
+                />
+              </Bar>
               <Bar
                 dataKey="score3"
                 stackId="a"
                 fill={SCORE_COLORS[3]}
                 animationDuration={800}
                 animationEasing="ease-out"
-              />
+              >
+                <LabelList
+                  dataKey="totalScore"
+                  position="top"
+                  offset={8}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  content={(props: any) => {
+                    const { x, y, width, value, index } = props;
+                    if (index === undefined) return null;
+                    const payload = data[index];
+                    if (payload?.topScore !== 3) return null;
+                    return (
+                      <text
+                        x={x + width / 2}
+                        y={y - 4}
+                        fill="#374151"
+                        textAnchor="middle"
+                        fontSize="13"
+                        fontWeight="600"
+                      >
+                        {value}
+                      </text>
+                    );
+                  }}
+                />
+              </Bar>
               <Bar
                 dataKey="score2"
                 stackId="a"
                 fill={SCORE_COLORS[2]}
                 animationDuration={800}
                 animationEasing="ease-out"
-              />
+              >
+                <LabelList
+                  dataKey="totalScore"
+                  position="top"
+                  offset={8}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  content={(props: any) => {
+                    const { x, y, width, value, index } = props;
+                    if (index === undefined) return null;
+                    const payload = data[index];
+                    if (payload?.topScore !== 2) return null;
+                    return (
+                      <text
+                        x={x + width / 2}
+                        y={y - 4}
+                        fill="#374151"
+                        textAnchor="middle"
+                        fontSize="13"
+                        fontWeight="600"
+                      >
+                        {value}
+                      </text>
+                    );
+                  }}
+                />
+              </Bar>
               <Bar
                 dataKey="score1"
                 stackId="a"
                 fill={SCORE_COLORS[1]}
                 animationDuration={800}
                 animationEasing="ease-out"
-              />
+              >
+                <LabelList
+                  dataKey="totalScore"
+                  position="top"
+                  offset={8}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  content={(props: any) => {
+                    const { x, y, width, value, index } = props;
+                    if (index === undefined) return null;
+                    const payload = data[index];
+                    if (payload?.topScore !== 1) return null;
+                    return (
+                      <text
+                        x={x + width / 2}
+                        y={y - 4}
+                        fill="#374151"
+                        textAnchor="middle"
+                        fontSize="13"
+                        fontWeight="600"
+                      >
+                        {value}
+                      </text>
+                    );
+                  }}
+                />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
 
