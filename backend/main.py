@@ -539,7 +539,7 @@ def get_calendar(
         created_at_jst = challenge.created_at.replace(tzinfo=timezone.utc).astimezone(jst)
         date_str = created_at_jst.strftime("%Y-%m-%d")
         daily_stats[date_str].append(challenge)
-    
+
     # 日別統計を計算
     days_list = []
     for date_str, challenges_on_day in sorted(daily_stats.items()):

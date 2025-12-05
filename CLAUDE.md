@@ -9,9 +9,13 @@
 ## フルスタック構成
 
 ### フロントエンド
-- **Framework**: Next.js (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
+- **Design System**: Material Design 3 (Material You)
 - **Styling**: Tailwind CSS
+- **UI Components**: Radix UI, Lucide React
+- **Charts**: Recharts
+- **Form Management**: React Hook Form + Zod
 - **Deploy**: Vercel
 
 ### バックエンド（backend/）
@@ -19,11 +23,17 @@
 - **ORM**: SQLAlchemy 2.0.44+
 - **Database**: PostgreSQL
 - **認証**: JWT + Argon2パスワードハッシュ（トークン有効期限: 10日）
-- **Deploy**: Render / Railway
+- **Email Service**: Resend
+- **Testing**: pytest + httpx (カバレッジ90%+)
+- **Code Quality**: Ruff
+- **Package Manager**: uv
+- **Deploy**: Railway
 
-### 通知
-- **メール通知**: SendGrid / Resend
-- **プッシュ通知**: Web Push API（検討中）
+### インフラ・通知
+- **メール通知**: Resend（実装済み✅）
+- **定期実行**: AWS Lambda + EventBridge（毎日、ユーザー設定時刻に実行）
+- **Database Hosting**: Railway PostgreSQL
+- **CI/CD**: GitHub Actions
 
 ## MVP機能
 
@@ -50,11 +60,14 @@
 ### 3. 可視化機能（実装済み✅）
 - **統計サマリー**: 全期間/今週/今月の挑戦数・スコア・平均スコア
 - **カレンダービュー**: 指定月の日別統計（挑戦数、合計スコア、平均スコア）
+- **週次トレンド**: 今週の挑戦をグラフで表示（Recharts使用）
 
-### 4. 通知機能（実装予定）
-- メール通知機能（SendGrid/Resend統合）
-- スケジューラー設定（定期実行）
-- ※ notification_timeフィールドは実装済み
+### 4. 通知機能（実装済み✅）
+- メール通知機能（Resend統合）
+- AWS Lambda + EventBridge定期実行（毎日、ユーザー設定時刻に実行）
+- 週次統計メール（HTMLテンプレート）
+- バッチ送信API（`POST /notifications/send`）- APIキー認証
+- テスト送信API（`POST /notifications/test`）- ユーザー認証
 
 ## 技術スタック
 
@@ -69,16 +82,22 @@
 ## プロジェクト構造
 
 ```
-backend/
-├── main.py          # FastAPIアプリケーションとエンドポイント定義
-├── models.py        # SQLAlchemyモデル（User, Challenge）
-├── schemas.py       # Pydanticスキーマ
-├── database.py      # データベース接続設定
-├── auth.py          # 認証関連のユーティリティ
-├── init_db.py       # データベース初期化スクリプト
-├── tests/           # テストコード
-├── pyproject.toml   # プロジェクト設定
-└── CLAUDE.md        # このファイル
+challenge-bank/
+├── frontend/               # Next.js フロントエンド
+│   ├── app/                # App Router (ルーティング)
+│   ├── components/         # UIコンポーネント
+│   └── lib/                # ユーティリティ (API, 認証)
+├── backend/                # FastAPI バックエンド
+│   ├── main.py             # APIエンドポイント
+│   ├── models.py           # SQLAlchemyモデル
+│   ├── schemas.py          # Pydanticスキーマ
+│   ├── auth.py             # 認証ロジック
+│   ├── database.py         # DB接続
+│   └── tests/              # pytestテストコード
+├── .github/workflows/      # GitHub Actions CI/CD
+├── CLAUDE.md               # このファイル（開発ドキュメント）
+├── README.md               # プロジェクト概要
+└── DEVELOPMENT.md          # ローカル開発ガイド
 ```
 
 ## 実装状況
@@ -109,16 +128,30 @@ backend/
 - [x] メール送信機能（Resend統合）
 - [x] バッチ送信API（`POST /notifications/send`）- APIキー認証
 - [x] テスト送信API（`POST /notifications/test`）- ユーザー認証
-- [x] AWS Lambda関数（EventBridge定期実行）
+- [x] AWS Lambda関数（EventBridge定期実行）- 毎日、ユーザー設定時刻に実行
 - [x] 週次統計メール（HTMLテンプレート対応）
+
+**フロントエンド:**
+- [x] 認証画面（ログイン・登録）
+- [x] ダッシュボード（統計サマリー、週次トレンドグラフ）
+- [x] 挑戦記録フォーム（作成・編集）
+- [x] 挑戦一覧表示
+- [x] カレンダービュー（月別表示）
+- [x] ユーザー設定（通知時刻変更）
+- [x] Material Design 3によるUI統一
+- [x] レスポンシブデザイン
 
 ### 🚧 今後の実装予定（優先度順）
 1. **フィルタリング・検索機能**
    - [ ] 日付範囲フィルタ（start_date, end_date）
+   - [ ] スコア範囲フィルタ
    - [ ] ソート機能（日付順、スコア順など）
 
+2. **タグ・カテゴリ機能**
+   - [ ] 挑戦のタグ付け
+   - [ ] カテゴリ別統計
+
 3. **Challengeモデルの拡張（将来的な機能）**
-   - [ ] challenge_content（挑戦内容）
    - [ ] challenge_content（挑戦内容の詳細）
    - [ ] next_action（ネクストアクション）
    - [ ] challenge_level（チャレンジ度合い: 1-3）
@@ -222,9 +255,19 @@ def create_challenge(
 
 ## セットアップ
 
+詳細なセットアップ手順は [DEVELOPMENT.md](./DEVELOPMENT.md) を参照してください。
+
+### クイックスタート（バックエンド）
+
 ```bash
+cd backend
+
 # 依存関係のインストール
 uv sync
+
+# 環境変数を設定
+export DATABASE_URL="postgresql://user:password@localhost:5432/challenge_bank"
+export JWT_SECRET_KEY="your-secret-key"
 
 # データベース初期化
 python init_db.py
@@ -235,11 +278,24 @@ uvicorn main:app --reload
 # テスト実行
 pytest
 
-# コードフォーマット
+# コードフォーマット & リンター
 ruff format .
-
-# リンター実行
 ruff check .
+```
+
+### クイックスタート（フロントエンド）
+
+```bash
+cd frontend
+
+# 依存関係のインストール
+npm install
+
+# 環境変数を設定（.env.local）
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+
+# 開発サーバー起動
+npm run dev
 ```
 
 ## API仕様
@@ -570,23 +626,32 @@ uv run pytest --cov=. --cov-report=term
 
 ## デプロイ
 
-### 本番環境要件
-- PostgreSQLデータベース
-- 環境変数設定
+### 本番環境構成（実装済み✅）
+
+#### バックエンド: Railway
+- **PostgreSQLデータベース**: Railway PostgreSQL
+- **FastAPI**: Railway Webサービス
+- **環境変数**:
   - `DATABASE_URL`: PostgreSQL接続文字列
   - `JWT_SECRET_KEY`: JWT署名用シークレットキー
-  - `SENDGRID_API_KEY` / `RESEND_API_KEY`: メール送信用APIキー
+  - `RESEND_API_KEY`: メール送信用APIキー
+  - `NOTIFICATION_API_KEY`: Lambda用APIキー
+- **ビルドコマンド**: `uv sync`
+- **起動コマンド**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- **自動デプロイ**: GitHubの`main`ブランチへのpush時
 
-### Render / Railway デプロイ手順
-1. GitHubリポジトリをプラットフォームに接続
-2. 環境変数を設定
-3. ビルドコマンド: `uv sync`
-4. 起動コマンド: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+#### フロントエンド: Vercel
+- **Next.js**: Vercelにデプロイ
+- **環境変数**:
+  - `NEXT_PUBLIC_API_URL`: バックエンドAPIのURL
+- **自動デプロイ**: GitHubの`main`ブランチへのpush時
 
-### CD（継続的デプロイ）
-将来的にGitHub Actionsで自動デプロイを設定可能：
-- `main`ブランチへのマージ時に本番環境へ自動デプロイ
-- `develop`ブランチへのマージ時にステージング環境へ自動デプロイ
+#### 通知: AWS Lambda + EventBridge
+- **Lambda関数**: Python 3.10ランタイム
+- **トリガー**: EventBridge（毎日、ユーザー設定時刻に実行）
+- **環境変数**:
+  - `BACKEND_API_URL`: バックエンドAPIのURL
+  - `NOTIFICATION_API_KEY`: バッチ送信用APIキー
 
 ## テスト
 
@@ -625,31 +690,45 @@ backend/tests/
 
 ## 今後の改善・拡張アイデア
 
-### Phase 2（MVPの次）
-- [ ] タグ・カテゴリ機能（挑戦をカテゴリ分け）
-- [ ] 検索機能（全文検索）
-- [ ] エクスポート機能（CSV、JSON）
-- [ ] パスワード変更機能（現在のパスワード確認後に変更）
-- [ ] メールアドレス変更機能（メール検証付き）
-- [ ] パスワードリセット機能（メール送信）
+### Phase 2（次の優先機能）
+- [ ] **フィルタリング・検索機能**: 日付範囲、スコア範囲での絞り込み
+- [ ] **タグ機能**: 挑戦をカテゴリ分けして整理、カテゴリ別統計
+- [ ] **目標設定機能**: 週間・月間目標を設定し、達成度を可視化
+- [ ] **エクスポート機能**: CSV/JSON形式でデータをエクスポート
+- [ ] **パスワード変更機能**: 現在のパスワード確認後に変更
+- [ ] **パスワードリセット機能**: メール送信による再設定
 
 ### Phase 3（長期的な拡張）
-- [ ] ソーシャル機能（挑戦の共有、コミュニティ）
-- [ ] AI分析（挑戦パターンの分析、アドバイス生成）
-- [ ] 目標設定機能（挑戦の目標を設定）
-- [ ] バッジ・報酬システム（ゲーミフィケーション）
-- [ ] モバイルアプリ（React Native / Flutter）
+- [ ] **ソーシャル機能**: 挑戦をコミュニティで共有
+- [ ] **AI分析**: 挑戦パターンの分析、アドバイス生成
+- [ ] **バッジ・報酬システム**: ゲーミフィケーション要素の追加
+- [ ] **モバイルアプリ**: React Native / Flutterでのネイティブアプリ開発
+- [ ] **他サービス連携**: Notion、Slack、Discord等との統合
 
 ## 参考リンク
 
+### バックエンド
 - [FastAPI公式ドキュメント](https://fastapi.tiangolo.com/)
 - [SQLAlchemy公式ドキュメント](https://docs.sqlalchemy.org/)
 - [JWT公式サイト](https://jwt.io/)
+- [pytest公式ドキュメント](https://docs.pytest.org/)
+
+### フロントエンド
+- [Next.js公式ドキュメント](https://nextjs.org/docs)
+- [Material Design 3](https://m3.material.io/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Recharts](https://recharts.org/)
+
+### インフラ
+- [Railway Documentation](https://docs.railway.app/)
+- [Vercel Documentation](https://vercel.com/docs)
+- [AWS Lambda Documentation](https://docs.aws.amazon.com/lambda/)
 
 ## ライセンス
 
-（プロジェクトのライセンスを記載）
+このプロジェクトはMITライセンスの下で公開されています。
 
 ---
 
+**最終更新**: 2024年
 **Note**: このドキュメントはプロジェクトの進行に合わせて随時更新してください。
