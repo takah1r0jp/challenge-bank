@@ -8,6 +8,10 @@
 
 🔗 **アプリURL**: [https://challenge-bank.vercel.app/](https://challenge-bank.vercel.app/)
 
+## 📹 デモ動画
+
+https://github.com/user-attachments/assets/0e718b0b-ed51-4698-88f9-7bee357afae3
+
 ---
 
 ## 📱 主な機能
